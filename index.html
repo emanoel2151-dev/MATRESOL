@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quadro de Cálculo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board: #16261c;
+    --board-deep: #101d15;
+    --chalk: #f1eee2;
+    --chalk-dim: #b9c4b6;
+    --gold: #d9a441;
+    --green: #83b06b;
+    --red: #c1584c;
+    --frame: #3a2a1c;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.035), transparent 40%),
+      radial-gradient(ellipse at 80% 85%, rgba(255,255,255,0.03), transparent 45%),
+      var(--board);
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--chalk);
+    padding:24px;
+  }
+
+  .frame{
+    width:100%;
+    max-width:460px;
+    background:var(--board-deep);
+    border:10px solid var(--frame);
+    border-radius:6px;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.4),
+      0 30px 60px -20px rgba(0,0,0,0.6),
+      inset 0 0 40px rgba(0,0,0,0.35);
+    padding:30px 26px 24px;
+    position:relative;
+  }
+
+  .frame::before{
+    content:"";
+    position:absolute;
+    top:6px; left:6px; right:6px; bottom:6px;
+    border:1px solid rgba(241,238,226,0.06);
+    pointer-events:none;
+    border-radius:2px;
+  }
+
+  h1{
+    margin:0 0 4px;
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:0.01em;
+  }
+  .subtitle{
+    margin:0 0 22px;
+    color:var(--chalk-dim);
+    font-size:0.92rem;
+    line-height:1.4;
+  }
+
+  /* ---- Start screen ---- */
+  .section{ display:none; }
+  .section.active{ display:block; }
+
+  .group-label{
+    font-size:0.78rem;
+    color:var(--gold);
+    margin:18px 0 8px;
+    font-weight:600;
+  }
+  .group-label:first-of-type{ margin-top:0; }
+
+  .choice-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .choice{
+    flex:1 1 auto;
+    min-width:100px;
+    background:transparent;
+    border:1.5px solid rgba(241,238,226,0.25);
+    color:var(--chalk);
+    padding:11px 12px;
+    border-radius:5px;
+    font-family:inherit;
+    font-size:0.88rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+    text-align:center;
+  }
+  .choice:hover{ border-color:var(--gold); }
+  .choice.selected{
+    border-color:var(--gold);
+    background:rgba(217,164,65,0.12);
+    color:var(--gold);
+  }
+  .choice:active{ transform:scale(0.98); }
+
+  .start-btn{
+    margin-top:26px;
+    width:100%;
+    padding:14px;
+    border-radius:5px;
+    border:none;
+    background:var(--gold);
+    color:#1c1406;
+    font-family:inherit;
+    font-weight:700;
+    font-size:1rem;
+    cursor:pointer;
+    transition:filter .15s ease, transform .1s ease;
+  }
+  .start-btn:hover{ filter:brightness(1.08); }
+  .start-btn:active{ transform:scale(0.98); }
+  .start-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  /* ---- Game screen ---- */
+  .hud{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.82rem;
+    color:var(--chalk-dim);
+    margin-bottom:18px;
+    border-bottom:1px dashed rgba(241,238,226,0.18);
+    padding-bottom:12px;
+  }
+  .hud strong{ color:var(--chalk); font-size:1rem; }
+  .hud .time-low{ color:var(--red); }
+
+  .equation-box{
+    background:rgba(241,238,226,0.03);
+    border:1px solid rgba(241,238,226,0.1);
+    border-radius:6px;
+    padding:34px 18px;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .equation{
+    font-family:'JetBrains Mono', monospace;
+    font-size:2.1rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+    word-break:break-word;
+  }
+
+  .answer-form{
+    display:flex;
+    gap:10px;
+  }
+  #answer-input{
+    flex:1;
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.2rem;
+    background:transparent;
+    border:1.5px solid rgba(241,238,226,0.3);
+    border-radius:5px;
+    color:var(--chalk);
+    padding:12px 14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  #answer-input:focus{ border-color:var(--gold); }
+  .submit-btn{
+    padding:0 22px;
+    border-radius:5px;
+    border:none;
+    background:var(--gold);
+    color:#1c1406;
+    font-weight:700;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .submit-btn:active{ transform:scale(0.97); }
+
+  .feedback{
+    min-height:20px;
+    margin-top:12px;
+    font-size:0.85rem;
+    font-weight:600;
+    text-align:center;
+  }
+  .feedback.correct{ color:var(--green); }
+  .feedback.wrong{ color:var(--red); }
+
+  /* ---- End screen ---- */
+  .end-score{
+    text-align:center;
+    margin:10px 0 4px;
+  }
+  .end-score .big{
+    font-family:'JetBrains Mono', monospace;
+    font-size:3.2rem;
+    font-weight:700;
+    color:var(--gold);
+    line-height:1;
+  }
+  .end-score .label{
+    color:var(--chalk-dim);
+    font-size:0.85rem;
+    margin-top:6px;
+  }
+  .stats-row{
+    display:flex;
+    justify-content:space-around;
+    margin:24px 0;
+    font-family:'JetBrains Mono', monospace;
+  }
+  .stats-row div{ text-align:center; }
+  .stats-row .num{ font-size:1.3rem; font-weight:700; }
+  .stats-row .lab{ font-size:0.72rem; color:var(--chalk-dim); margin-top:2px; }
+
+  .again-btn{
+    width:100%;
+    padding:14px;
+    border-radius:5px;
+    border:1.5px solid var(--gold);
+    background:transparent;
+    color:var(--gold);
+    font-family:inherit;
+    font-weight:700;
+    font-size:0.95rem;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .again-btn:active{ transform:scale(0.98); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <!-- START -->
+  <section class="section active" id="screen-start">
+    <h1>Quadro de Cálculo</h1>
+    <p class="subtitle">Escolha o nível e responda o máximo de contas que conseguir em 60 segundos.</p>
+
+    <div class="group-label">Nível</div>
+    <div class="choice-row" id="level-row">
+      <button class="choice selected" data-level="basico">Básico</button>
+      <button class="choice" data-level="avancado">Avançado</button>
+    </div>
+
+    <div class="group-label" id="basic-label">Operações — básico</div>
+    <div class="choice-row" id="basic-ops">
+      <button class="choice selected" data-op="add">+ Adição</button>
+      <button class="choice selected" data-op="sub">− Subtração</button>
+      <button class="choice selected" data-op="mul">× Multiplicação</button>
+      <button class="choice selected" data-op="div">÷ Divisão</button>
+    </div>
+
+    <div class="group-label" style="display:none" id="adv-label">Operações — avançado</div>
+    <div class="choice-row" id="adv-ops" style="display:none">
+      <button class="choice selected" data-op="pow">Potência</button>
+      <button class="choice selected" data-op="root">Raiz quadrada</button>
+      <button class="choice selected" data-op="pct">Porcentagem</button>
+      <button class="choice selected" data-op="eq">Equação (x)</button>
+      <button class="choice selected" data-op="order">Ordem de operações</button>
+    </div>
+
+    <button class="start-btn" id="start-btn">Começar</button>
+  </section>
+
+  <!-- GAME -->
+  <section class="section" id="screen-game">
+    <div class="hud">
+      <span>Tempo: <strong id="hud-time">60</strong>s</span>
+      <span>Pontos: <strong id="hud-score">0</strong></span>
+      <span>Sequência: <strong id="hud-streak">0</strong></span>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation" id="equation-text">—</div>
+    </div>
+
+    <div class="answer-form" id="answer-form">
+      <input type="text" inputmode="decimal" autocomplete="off" id="answer-input" placeholder="sua resposta">
+      <button type="button" class="submit-btn" id="submit-btn">Enviar</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+  </section>
+
+  <!-- END -->
+  <section class="section" id="screen-end">
+    <h1>Tempo esgotado</h1>
+    <div class="end-score">
+      <div class="big" id="final-score">0</div>
+      <div class="label">pontos</div>
+    </div>
+    <div class="stats-row">
+      <div><div class="num" id="final-correct">0</div><div class="lab">acertos</div></div>
+      <div><div class="num" id="final-wrong">0</div><div class="lab">erros</div></div>
+      <div><div class="num" id="final-best-streak">0</div><div class="lab">melhor sequência</div></div>
+    </div>
+    <button class="again-btn" id="again-btn">Jogar de novo</button>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const startScreen = document.getElementById('screen-start');
+  const gameScreen = document.getElementById('screen-game');
+  const endScreen = document.getElementById('screen-end');
+
+  function showScreen(el){
+    [startScreen, gameScreen, endScreen].forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ---- Level / operation selection ----
+  let level = 'basico';
+  const levelButtons = document.querySelectorAll('#level-row .choice');
+  const basicOps = document.getElementById('basic-ops');
+  const advOps = document.getElementById('adv-ops');
+  const advLabel = document.getElementById('adv-label');
+  const basicLabel = document.getElementById('basic-label');
+
+  levelButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      levelButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      level = btn.dataset.level;
+      if(level === 'basico'){
+        basicOps.style.display = 'flex';
+        basicLabel.style.display = 'block';
+        advOps.style.display = 'none';
+        advLabel.style.display = 'none';
+      } else {
+        basicOps.style.display = 'none';
+        basicLabel.style.display = 'none';
+        advOps.style.display = 'flex';
+        advLabel.style.display = 'block';
+      }
+      updateStartBtn();
+    });
+  });
+
+  function toggleOpButton(btn){
+    btn.classList.toggle('selected');
+  }
+  [...basicOps.children, ...advOps.children].forEach(btn => {
+    btn.addEventListener('click', () => { toggleOpButton(btn); updateStartBtn(); });
+  });
+
+  const startBtn = document.getElementById('start-btn');
+  function activeOps(){
+    const container = level === 'basico' ? basicOps : advOps;
+    return [...container.children].filter(b => b.classList.contains('selected')).map(b => b.dataset.op);
+  }
+  function updateStartBtn(){
+    startBtn.disabled = activeOps().length === 0;
+  }
+
+  // ---- Question generation ----
+  function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function genBasic(op){
+    let a, b, answer, text;
+    switch(op){
+      case 'add':
+        a = randInt(10, 99); b = randInt(10, 99);
+        answer = a + b; text = `${a} + ${b}`;
+        break;
+      case 'sub':
+        a = randInt(10, 99); b = randInt(1, a);
+        answer = a - b; text = `${a} − ${b}`;
+        break;
+      case 'mul':
+        a = randInt(2, 12); b = randInt(2, 12);
+        answer = a * b; text = `${a} × ${b}`;
+        break;
+      case 'div':
+        b = randInt(2, 12); answer = randInt(2, 12); a = b * answer;
+        text = `${a} ÷ ${b}`;
+        break;
+    }
+    return { text, answer };
+  }
+
+  function genAdvanced(op){
+    let a, b, c, answer, text;
+    switch(op){
+      case 'pow':
+        a = randInt(2, 9); b = randInt(2, 3);
+        answer = Math.pow(a, b); text = `${a}^${b}`;
+        break;
+      case 'root':
+        answer = randInt(2, 15); a = answer * answer;
+        text = `√${a}`;
+        break;
+      case 'pct':
+        const pctOptions = [10, 20, 25, 50, 75];
+        b = pctOptions[randInt(0, pctOptions.length - 1)];
+        a = randInt(1, 40) * 4;
+        answer = (a * b) / 100;
+        text = `${b}% de ${a}`;
+        break;
+      case 'eq':
+        b = randInt(2, 12); c = randInt(1, 20);
+        answer = randInt(1, 15);
+        a = b * answer + c;
+        text = `${b}x + ${c} = ${a}   (x = ?)`;
+        break;
+      case 'order':
+        a = randInt(2, 9); b = randInt(2, 9); c = randInt(2, 9);
+        answer = a + b * c;
+        text = `${a} + ${b} × ${c}`;
+        break;
+    }
+    return { text, answer };
+  }
+
+  let currentAnswer = null;
+  let ops = [];
+  const equationText = document.getElementById('equation-text');
+  const answerInput = document.getElementById('answer-input');
+  const feedback = document.getElementById('feedback');
+
+  function nextQuestion(){
+    const op = ops[randInt(0, ops.length - 1)];
+    const q = level === 'basico' ? genBasic(op) : genAdvanced(op);
+    currentAnswer = q.answer;
+    equationText.textContent = q.text;
+    answerInput.value = '';
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    answerInput.focus();
+  }
+
+  // ---- Game state ----
+  let score = 0, correct = 0, wrong = 0, streak = 0, bestStreak = 0;
+  let timeLeft = 60, timerId = null;
+
+  const hudTime = document.getElementById('hud-time');
+  const hudScore = document.getElementById('hud-score');
+  const hudStreak = document.getElementById('hud-streak');
+
+  function startGame(){
+    ops = activeOps();
+    if(ops.length === 0) return;
+    score = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0; timeLeft = 60;
+    hudScore.textContent = score;
+    hudStreak.textContent = streak;
+    hudTime.textContent = timeLeft;
+    hudTime.classList.remove('time-low');
+    showScreen(gameScreen);
+    nextQuestion();
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+      timeLeft--;
+      hudTime.textContent = timeLeft;
+      if(timeLeft <= 10) hudTime.classList.add('time-low');
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame(){
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-correct').textContent = correct;
+    document.getElementById('final-wrong').textContent = wrong;
+    document.getElementById('final-best-streak').textContent = bestStreak;
+    showScreen(endScreen);
+  }
+
+  function submitAnswer(){
+    if(currentAnswer === null || timeLeft <= 0) return;
+    const raw = answerInput.value.trim().replace(',', '.');
+    const val = parseFloat(raw);
+    if(isNaN(val)) return;
+
+    const isCorrect = Math.abs(val - currentAnswer) < 0.001;
+    if(isCorrect){
+      correct++;
+      streak++;
+      bestStreak = Math.max(bestStreak, streak);
+      const bonus = Math.min(streak, 5);
+      score += 10 + bonus;
+      feedback.textContent = 'Certo!';
+      feedback.className = 'feedback correct';
+    } else {
+      wrong++;
+      streak = 0;
+      feedback.textContent = `Errado — resposta: ${currentAnswer}`;
+      feedback.className = 'feedback wrong';
+    }
+    hudScore.textContent = score;
+    hudStreak.textContent = streak;
+    setTimeout(nextQuestion, isCorrect ? 350 : 750);
+  }
+
+  document.getElementById('submit-btn').addEventListener('click', submitAnswer);
+  answerInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+
+  startBtn.addEventListener('click', startGame);
+  document.getElementById('again-btn').addEventListener('click', () => showScreen(startScreen));
+
+  updateStartBtn();
+})();
+</script>
+
+</body>
+</html>
