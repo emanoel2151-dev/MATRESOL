@@ -70,7 +70,6 @@
     line-height:1.4;
   }
 
-  /* ---- Start screen ---- */
   .section{ display:none; }
   .section.active{ display:block; }
 
@@ -127,6 +126,123 @@
   .start-btn:hover{ filter:brightness(1.08); }
   .start-btn:active{ transform:scale(0.98); }
   .start-btn:disabled{ opacity:0.4; cursor:not-allowed; }
+
+  .link-btn{
+    margin-top:12px;
+    width:100%;
+    padding:12px;
+    border-radius:5px;
+    border:1.5px dashed rgba(217,164,65,0.5);
+    background:transparent;
+    color:var(--gold);
+    font-family:inherit;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+  }
+  .link-btn:active{ transform:scale(0.98); }
+
+  .back-link{
+    display:inline-block;
+    margin-top:18px;
+    color:var(--chalk-dim);
+    font-size:0.82rem;
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+    font-family:inherit;
+  }
+
+  .text-input{
+    width:100%;
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.05rem;
+    background:transparent;
+    border:1.5px solid rgba(241,238,226,0.3);
+    border-radius:5px;
+    color:var(--chalk);
+    padding:12px 14px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .text-input:focus{ border-color:var(--gold); }
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block;
+    font-size:0.78rem;
+    color:var(--chalk-dim);
+    margin-bottom:6px;
+  }
+  .error-text{
+    color:var(--red);
+    font-size:0.82rem;
+    min-height:18px;
+    margin-top:8px;
+  }
+
+  /* ---- room menu ---- */
+  .room-menu-row{ display:flex; flex-direction:column; gap:12px; margin-top:6px; }
+  .room-card{
+    text-align:left;
+    padding:16px 16px;
+    border-radius:6px;
+    border:1.5px solid rgba(241,238,226,0.2);
+    background:transparent;
+    color:var(--chalk);
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .room-card:hover{ border-color:var(--gold); }
+  .room-card .rc-title{ font-weight:700; font-size:1rem; margin-bottom:3px; }
+  .room-card .rc-sub{ font-size:0.8rem; color:var(--chalk-dim); }
+
+  /* ---- lobby ---- */
+  .room-code-display{
+    text-align:center;
+    background:rgba(217,164,65,0.08);
+    border:1.5px dashed rgba(217,164,65,0.5);
+    border-radius:6px;
+    padding:18px;
+    margin-bottom:18px;
+  }
+  .room-code-display .code{
+    font-family:'JetBrains Mono', monospace;
+    font-size:2.2rem;
+    font-weight:700;
+    letter-spacing:0.12em;
+    color:var(--gold);
+  }
+  .room-code-display .hint{
+    font-size:0.78rem;
+    color:var(--chalk-dim);
+    margin-top:4px;
+  }
+  .lobby-players{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:20px;
+    max-height:220px;
+    overflow-y:auto;
+  }
+  .lobby-player{
+    padding:10px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.9rem;
+    display:flex;
+    justify-content:space-between;
+  }
+  .lobby-player .you-tag{ color:var(--gold); font-size:0.72rem; font-weight:700; }
+  .waiting-note{
+    text-align:center;
+    color:var(--chalk-dim);
+    font-size:0.88rem;
+    padding:12px 0;
+  }
 
   /* ---- Game screen ---- */
   .hud{
@@ -198,6 +314,28 @@
   .feedback.correct{ color:var(--green); }
   .feedback.wrong{ color:var(--red); }
 
+  .leaderboard-box{
+    display:none;
+    margin-top:20px;
+    border-top:1px dashed rgba(241,238,226,0.18);
+    padding-top:14px;
+  }
+  .leaderboard-box .lb-title{
+    font-size:0.76rem;
+    color:var(--gold);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .lb-row{
+    display:flex;
+    justify-content:space-between;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem;
+    padding:6px 8px;
+    border-radius:4px;
+  }
+  .lb-row.me{ background:rgba(217,164,65,0.1); color:var(--gold); }
+
   /* ---- End screen ---- */
   .end-score{
     text-align:center;
@@ -224,6 +362,25 @@
   .stats-row div{ text-align:center; }
   .stats-row .num{ font-size:1.3rem; font-weight:700; }
   .stats-row .lab{ font-size:0.72rem; color:var(--chalk-dim); margin-top:2px; }
+
+  .end-leaderboard{
+    display:none;
+    margin-bottom:22px;
+    border-top:1px dashed rgba(241,238,226,0.18);
+    border-bottom:1px dashed rgba(241,238,226,0.18);
+    padding:14px 0;
+  }
+  .end-leaderboard .lb-title{
+    font-size:0.78rem;
+    color:var(--gold);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .end-leaderboard .lb-row{
+    font-size:0.92rem;
+    padding:8px 10px;
+  }
+  .end-leaderboard .lb-row .rank{ color:var(--chalk-dim); margin-right:8px; }
 
   .again-btn{
     width:100%;
@@ -277,7 +434,98 @@
       <button class="choice selected" data-op="order">Ordem de operações</button>
     </div>
 
-    <button class="start-btn" id="start-btn">Começar</button>
+    <button class="start-btn" id="start-btn">Começar sozinho</button>
+    <button class="link-btn" id="goto-room-menu-btn">Jogar em sala com outras pessoas</button>
+  </section>
+
+  <!-- ROOM MENU -->
+  <section class="section" id="screen-room-menu">
+    <h1>Jogar em sala</h1>
+    <p class="subtitle">Crie uma sala e convide amigos, ou entre com um código que já recebeu.</p>
+    <div class="room-menu-row">
+      <button class="room-card" id="goto-create-btn">
+        <div class="rc-title">Criar sala</div>
+        <div class="rc-sub">Você define o nível e gera um código para compartilhar</div>
+      </button>
+      <button class="room-card" id="goto-join-btn">
+        <div class="rc-title">Entrar em sala</div>
+        <div class="rc-sub">Use o código que o anfitrião te enviou</div>
+      </button>
+    </div>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- CREATE ROOM -->
+  <section class="section" id="screen-room-create">
+    <h1>Criar sala</h1>
+    <p class="subtitle">Você é o anfitrião: escolhe o nível e inicia a corrida quando todos estiverem prontos.</p>
+
+    <div class="field">
+      <label for="create-name-input">Seu nome</label>
+      <input type="text" class="text-input" id="create-name-input" maxlength="18" placeholder="ex: Emanoel">
+    </div>
+
+    <div class="group-label" style="margin-top:6px">Nível</div>
+    <div class="choice-row" id="room-level-row">
+      <button class="choice selected" data-level="basico">Básico</button>
+      <button class="choice" data-level="avancado">Avançado</button>
+    </div>
+
+    <div class="group-label" id="room-basic-label">Operações — básico</div>
+    <div class="choice-row" id="room-basic-ops">
+      <button class="choice selected" data-op="add">+ Adição</button>
+      <button class="choice selected" data-op="sub">− Subtração</button>
+      <button class="choice selected" data-op="mul">× Multiplicação</button>
+      <button class="choice selected" data-op="div">÷ Divisão</button>
+    </div>
+
+    <div class="group-label" style="display:none" id="room-adv-label">Operações — avançado</div>
+    <div class="choice-row" id="room-adv-ops" style="display:none">
+      <button class="choice selected" data-op="pow">Potência</button>
+      <button class="choice selected" data-op="root">Raiz quadrada</button>
+      <button class="choice selected" data-op="pct">Porcentagem</button>
+      <button class="choice selected" data-op="eq">Equação (x)</button>
+      <button class="choice selected" data-op="order">Ordem de operações</button>
+    </div>
+
+    <div class="error-text" id="create-error"></div>
+    <button class="start-btn" id="create-room-btn">Criar sala</button>
+    <button class="back-link" data-back="screen-room-menu">Voltar</button>
+  </section>
+
+  <!-- JOIN ROOM -->
+  <section class="section" id="screen-room-join">
+    <h1>Entrar em sala</h1>
+    <p class="subtitle">Peça o código de 4 letras para quem criou a sala.</p>
+
+    <div class="field">
+      <label for="join-code-input">Código da sala</label>
+      <input type="text" class="text-input" id="join-code-input" maxlength="4" placeholder="ex: K7QX" style="text-transform:uppercase; letter-spacing:0.15em;">
+    </div>
+    <div class="field">
+      <label for="join-name-input">Seu nome</label>
+      <input type="text" class="text-input" id="join-name-input" maxlength="18" placeholder="ex: Emanoel">
+    </div>
+
+    <div class="error-text" id="join-error"></div>
+    <button class="start-btn" id="join-room-btn">Entrar</button>
+    <button class="back-link" data-back="screen-room-menu">Voltar</button>
+  </section>
+
+  <!-- LOBBY -->
+  <section class="section" id="screen-lobby">
+    <h1>Sala de espera</h1>
+    <div class="room-code-display">
+      <div class="code" id="lobby-code">----</div>
+      <div class="hint">compartilhe este código com quem vai competir</div>
+    </div>
+
+    <div class="group-label">Jogadores (<span id="lobby-count">0</span>)</div>
+    <div class="lobby-players" id="lobby-players"></div>
+
+    <button class="start-btn" id="lobby-start-btn">Iniciar corrida</button>
+    <div class="waiting-note" id="lobby-waiting-note" style="display:none">Aguardando o anfitrião iniciar a corrida…</div>
+    <button class="back-link" id="lobby-leave-btn">Sair da sala</button>
   </section>
 
   <!-- GAME -->
@@ -298,11 +546,16 @@
     </div>
 
     <div class="feedback" id="feedback"></div>
+
+    <div class="leaderboard-box" id="leaderboard-box">
+      <div class="lb-title">Ranking ao vivo</div>
+      <div id="leaderboard-list"></div>
+    </div>
   </section>
 
   <!-- END -->
   <section class="section" id="screen-end">
-    <h1>Tempo esgotado</h1>
+    <h1 id="end-title">Tempo esgotado</h1>
     <div class="end-score">
       <div class="big" id="final-score">0</div>
       <div class="label">pontos</div>
@@ -312,6 +565,12 @@
       <div><div class="num" id="final-wrong">0</div><div class="lab">erros</div></div>
       <div><div class="num" id="final-best-streak">0</div><div class="lab">melhor sequência</div></div>
     </div>
+
+    <div class="end-leaderboard" id="end-leaderboard">
+      <div class="lb-title">Classificação da sala</div>
+      <div id="end-leaderboard-list"></div>
+    </div>
+
     <button class="again-btn" id="again-btn">Jogar de novo</button>
   </section>
 
@@ -319,60 +578,59 @@
 
 <script>
 (function(){
-  const startScreen = document.getElementById('screen-start');
-  const gameScreen = document.getElementById('screen-game');
-  const endScreen = document.getElementById('screen-end');
+  const screens = {};
+  document.querySelectorAll('.section').forEach(s => screens[s.id] = s);
 
-  function showScreen(el){
-    [startScreen, gameScreen, endScreen].forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
+  function showScreen(id){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[id].classList.add('active');
   }
 
-  // ---- Level / operation selection ----
-  let level = 'basico';
-  const levelButtons = document.querySelectorAll('#level-row .choice');
-  const basicOps = document.getElementById('basic-ops');
-  const advOps = document.getElementById('adv-ops');
-  const advLabel = document.getElementById('adv-label');
-  const basicLabel = document.getElementById('basic-label');
-
-  levelButtons.forEach(btn => {
+  document.querySelectorAll('[data-back]').forEach(btn => {
     btn.addEventListener('click', () => {
-      levelButtons.forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      level = btn.dataset.level;
-      if(level === 'basico'){
-        basicOps.style.display = 'flex';
-        basicLabel.style.display = 'block';
-        advOps.style.display = 'none';
-        advLabel.style.display = 'none';
-      } else {
-        basicOps.style.display = 'none';
-        basicLabel.style.display = 'none';
-        advOps.style.display = 'flex';
-        advLabel.style.display = 'block';
-      }
-      updateStartBtn();
+      stopAllPolling();
+      showScreen(btn.dataset.back);
     });
   });
 
-  function toggleOpButton(btn){
-    btn.classList.toggle('selected');
+  // =========================================================
+  // Storage helpers (shared, multi-user room data)
+  // =========================================================
+  async function storGet(key, shared){
+    try{
+      const r = await window.storage.get(key, shared);
+      return r ? JSON.parse(r.value) : null;
+    } catch(e){ return null; }
   }
-  [...basicOps.children, ...advOps.children].forEach(btn => {
-    btn.addEventListener('click', () => { toggleOpButton(btn); updateStartBtn(); });
-  });
+  async function storSet(key, value, shared){
+    try{
+      await window.storage.set(key, JSON.stringify(value), shared);
+      return true;
+    } catch(e){ return false; }
+  }
+  async function storList(prefix, shared){
+    try{
+      const r = await window.storage.list(prefix, shared);
+      return (r && r.keys) ? r.keys : [];
+    } catch(e){ return []; }
+  }
 
-  const startBtn = document.getElementById('start-btn');
-  function activeOps(){
-    const container = level === 'basico' ? basicOps : advOps;
-    return [...container.children].filter(b => b.classList.contains('selected')).map(b => b.dataset.op);
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
-  function updateStartBtn(){
-    startBtn.disabled = activeOps().length === 0;
+  function genId(){
+    return 'p_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  }
+  function genRoomCode(){
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for(let i=0;i<4;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
   }
 
-  // ---- Question generation ----
+  // =========================================================
+  // Shared question generation
+  // =========================================================
   function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
 
   function genBasic(op){
@@ -431,8 +689,10 @@
     return { text, answer };
   }
 
-  let currentAnswer = null;
+  let level = 'basico';
   let ops = [];
+  let currentAnswer = null;
+
   const equationText = document.getElementById('equation-text');
   const answerInput = document.getElementById('answer-input');
   const feedback = document.getElementById('feedback');
@@ -448,23 +708,106 @@
     answerInput.focus();
   }
 
-  // ---- Game state ----
+  // =========================================================
+  // Solo setup (screen-start)
+  // =========================================================
+  function setupLevelPicker(rowId, basicOpsId, advOpsId, basicLabelId, advLabelId, onChange){
+    const row = document.getElementById(rowId);
+    const basicOps = document.getElementById(basicOpsId);
+    const advOps = document.getElementById(advOpsId);
+    const basicLabel = document.getElementById(basicLabelId);
+    const advLabel = document.getElementById(advLabelId);
+    const buttons = row.querySelectorAll('.choice');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        const lvl = btn.dataset.level;
+        if(lvl === 'basico'){
+          basicOps.style.display = 'flex';
+          basicLabel.style.display = 'block';
+          advOps.style.display = 'none';
+          advLabel.style.display = 'none';
+        } else {
+          basicOps.style.display = 'none';
+          basicLabel.style.display = 'none';
+          advOps.style.display = 'flex';
+          advLabel.style.display = 'block';
+        }
+        onChange();
+      });
+    });
+    [...basicOps.children, ...advOps.children].forEach(btn => {
+      btn.addEventListener('click', () => { btn.classList.toggle('selected'); onChange(); });
+    });
+
+    return {
+      getLevel: () => [...row.querySelectorAll('.choice')].find(b => b.classList.contains('selected')).dataset.level,
+      getOps: () => {
+        const lvl = [...row.querySelectorAll('.choice')].find(b => b.classList.contains('selected')).dataset.level;
+        const container = lvl === 'basico' ? basicOps : advOps;
+        return [...container.children].filter(b => b.classList.contains('selected')).map(b => b.dataset.op);
+      }
+    };
+  }
+
+  const startBtn = document.getElementById('start-btn');
+  const soloPicker = setupLevelPicker('level-row', 'basic-ops', 'adv-ops', 'basic-label', 'adv-label', () => {
+    startBtn.disabled = soloPicker.getOps().length === 0;
+  });
+
+  const createRoomBtn = document.getElementById('create-room-btn');
+  const roomPicker = setupLevelPicker('room-level-row', 'room-basic-ops', 'room-adv-ops', 'room-basic-label', 'room-adv-label', () => {
+    createRoomBtn.disabled = roomPicker.getOps().length === 0;
+  });
+
+  document.getElementById('goto-room-menu-btn').addEventListener('click', () => showScreen('screen-room-menu'));
+  document.getElementById('goto-create-btn').addEventListener('click', () => showScreen('screen-room-create'));
+  document.getElementById('goto-join-btn').addEventListener('click', () => showScreen('screen-room-join'));
+
+  // =========================================================
+  // Game state (shared by solo + room modes)
+  // =========================================================
   let score = 0, correct = 0, wrong = 0, streak = 0, bestStreak = 0;
   let timeLeft = 60, timerId = null;
+  let roomMode = false;
+  let roomCode = null, myId = null, myName = '', isHost = false;
+  let roomStartedAt = null;
+  let lobbyPollId = null, leaderboardPollId = null, gameStartedFromRoom = false;
 
   const hudTime = document.getElementById('hud-time');
   const hudScore = document.getElementById('hud-score');
   const hudStreak = document.getElementById('hud-streak');
+  const leaderboardBox = document.getElementById('leaderboard-box');
+  const leaderboardList = document.getElementById('leaderboard-list');
+  const endLeaderboard = document.getElementById('end-leaderboard');
+  const endLeaderboardList = document.getElementById('end-leaderboard-list');
+  const endTitle = document.getElementById('end-title');
 
-  function startGame(){
-    ops = activeOps();
+  function stopAllPolling(){
+    clearInterval(lobbyPollId); lobbyPollId = null;
+    clearInterval(leaderboardPollId); leaderboardPollId = null;
+    clearInterval(timerId); timerId = null;
+  }
+
+  function resetGameCounters(){
+    score = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0;
+    hudScore.textContent = 0; hudStreak.textContent = 0;
+  }
+
+  // ---- Solo flow ----
+  function startSoloGame(){
+    roomMode = false;
+    level = soloPicker.getLevel();
+    ops = soloPicker.getOps();
     if(ops.length === 0) return;
-    score = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0; timeLeft = 60;
-    hudScore.textContent = score;
-    hudStreak.textContent = streak;
+    resetGameCounters();
+    timeLeft = 60;
     hudTime.textContent = timeLeft;
     hudTime.classList.remove('time-low');
-    showScreen(gameScreen);
+    leaderboardBox.style.display = 'none';
+    showScreen('screen-game');
     nextQuestion();
     clearInterval(timerId);
     timerId = setInterval(() => {
@@ -479,11 +822,14 @@
   }
 
   function endGame(){
+    endTitle.textContent = 'Tempo esgotado';
     document.getElementById('final-score').textContent = score;
     document.getElementById('final-correct').textContent = correct;
     document.getElementById('final-wrong').textContent = wrong;
     document.getElementById('final-best-streak').textContent = bestStreak;
-    showScreen(endScreen);
+    endLeaderboard.style.display = roomMode ? 'block' : 'none';
+    showScreen('screen-end');
+    if(roomMode) finishRoomGame();
   }
 
   function submitAnswer(){
@@ -509,21 +855,210 @@
     }
     hudScore.textContent = score;
     hudStreak.textContent = streak;
+    if(roomMode) pushMyScore();
     setTimeout(nextQuestion, isCorrect ? 350 : 750);
   }
 
   document.getElementById('submit-btn').addEventListener('click', submitAnswer);
   answerInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      submitAnswer();
-    }
+    if(e.key === 'Enter'){ e.preventDefault(); submitAnswer(); }
   });
 
-  startBtn.addEventListener('click', startGame);
-  document.getElementById('again-btn').addEventListener('click', () => showScreen(startScreen));
+  startBtn.addEventListener('click', startSoloGame);
+  document.getElementById('again-btn').addEventListener('click', () => {
+    stopAllPolling();
+    roomMode = false;
+    showScreen('screen-start');
+  });
 
-  updateStartBtn();
+  // =========================================================
+  // Room mode: create / join / lobby / play / leaderboard
+  // =========================================================
+  const createNameInput = document.getElementById('create-name-input');
+  const createError = document.getElementById('create-error');
+  const joinCodeInput = document.getElementById('join-code-input');
+  const joinNameInput = document.getElementById('join-name-input');
+  const joinError = document.getElementById('join-error');
+
+  const lobbyCodeEl = document.getElementById('lobby-code');
+  const lobbyPlayersEl = document.getElementById('lobby-players');
+  const lobbyCountEl = document.getElementById('lobby-count');
+  const lobbyStartBtn = document.getElementById('lobby-start-btn');
+  const lobbyWaitingNote = document.getElementById('lobby-waiting-note');
+
+  joinCodeInput.addEventListener('input', () => {
+    joinCodeInput.value = joinCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+  });
+
+  createRoomBtn.addEventListener('click', async () => {
+    const name = createNameInput.value.trim();
+    if(!name){ createError.textContent = 'Digite seu nome.'; return; }
+    const roomOps = roomPicker.getOps();
+    if(roomOps.length === 0){ createError.textContent = 'Selecione ao menos uma operação.'; return; }
+    createError.textContent = '';
+    createRoomBtn.disabled = true;
+
+    myId = genId();
+    myName = name;
+    isHost = true;
+    roomCode = genRoomCode();
+    const roomLevel = roomPicker.getLevel();
+
+    await storSet(`room:${roomCode}`, { hostId: myId, level: roomLevel, ops: roomOps, status: 'lobby', startedAt: null }, true);
+    await storSet(`room:${roomCode}:p:${myId}`, { name: myName }, true);
+
+    createRoomBtn.disabled = false;
+    enterLobby();
+  });
+
+  document.getElementById('join-room-btn').addEventListener('click', async () => {
+    const code = joinCodeInput.value.trim();
+    const name = joinNameInput.value.trim();
+    if(code.length !== 4){ joinError.textContent = 'Digite o código de 4 letras.'; return; }
+    if(!name){ joinError.textContent = 'Digite seu nome.'; return; }
+    joinError.textContent = 'Procurando sala…';
+
+    const meta = await storGet(`room:${code}`, true);
+    if(!meta){ joinError.textContent = 'Sala não encontrada. Confira o código.'; return; }
+    if(meta.status === 'playing'){ joinError.textContent = 'Essa corrida já começou. Peça uma nova sala.'; return; }
+
+    joinError.textContent = '';
+    roomCode = code;
+    myId = genId();
+    myName = name;
+    isHost = false;
+
+    await storSet(`room:${roomCode}:p:${myId}`, { name: myName }, true);
+    enterLobby();
+  });
+
+  function enterLobby(){
+    gameStartedFromRoom = false;
+    lobbyCodeEl.textContent = roomCode;
+    lobbyStartBtn.style.display = isHost ? 'block' : 'none';
+    lobbyWaitingNote.style.display = isHost ? 'none' : 'block';
+    showScreen('screen-lobby');
+    refreshLobby();
+    clearInterval(lobbyPollId);
+    lobbyPollId = setInterval(refreshLobby, 1500);
+  }
+
+  async function refreshLobby(){
+    const meta = await storGet(`room:${roomCode}`, true);
+    if(!meta) return;
+
+    const keys = await storList(`room:${roomCode}:p:`, true);
+    const players = [];
+    for(const k of keys){
+      const p = await storGet(k, true);
+      if(p) players.push({ id: k.split(':').pop(), name: p.name });
+    }
+    lobbyCountEl.textContent = players.length;
+    lobbyPlayersEl.innerHTML = players.map(p =>
+      `<div class="lobby-player"><span>${escapeHtml(p.name)}</span>${p.id === myId ? '<span class="you-tag">VOCÊ</span>' : ''}</div>`
+    ).join('') || '<div class="lobby-player">Aguardando jogadores…</div>';
+
+    if(meta.status === 'playing' && !gameStartedFromRoom){
+      gameStartedFromRoom = true;
+      clearInterval(lobbyPollId);
+      level = meta.level;
+      ops = meta.ops;
+      roomStartedAt = meta.startedAt;
+      beginRoomGame();
+    }
+  }
+
+  lobbyStartBtn.addEventListener('click', async () => {
+    lobbyStartBtn.disabled = true;
+    const meta = await storGet(`room:${roomCode}`, true);
+    const startedAt = Date.now();
+    await storSet(`room:${roomCode}`, {
+      hostId: myId,
+      level: meta ? meta.level : 'basico',
+      ops: meta ? meta.ops : ['add','sub','mul','div'],
+      status: 'playing',
+      startedAt
+    }, true);
+    level = meta ? meta.level : 'basico';
+    ops = meta ? meta.ops : ['add','sub','mul','div'];
+    roomStartedAt = startedAt;
+    gameStartedFromRoom = true;
+    clearInterval(lobbyPollId);
+    beginRoomGame();
+  });
+
+  document.getElementById('lobby-leave-btn').addEventListener('click', () => {
+    stopAllPolling();
+    roomMode = false;
+    roomCode = null;
+    showScreen('screen-start');
+  });
+
+  function beginRoomGame(){
+    roomMode = true;
+    resetGameCounters();
+    hudTime.classList.remove('time-low');
+    leaderboardBox.style.display = 'block';
+    showScreen('screen-game');
+    nextQuestion();
+    pushMyScore();
+
+    clearInterval(timerId);
+    updateRoomTimer();
+    timerId = setInterval(updateRoomTimer, 500);
+
+    refreshLeaderboard();
+    clearInterval(leaderboardPollId);
+    leaderboardPollId = setInterval(refreshLeaderboard, 1500);
+  }
+
+  function updateRoomTimer(){
+    const elapsed = Math.floor((Date.now() - roomStartedAt) / 1000);
+    const remaining = Math.max(0, 60 - elapsed);
+    timeLeft = remaining;
+    hudTime.textContent = remaining;
+    if(remaining <= 10) hudTime.classList.add('time-low');
+    if(remaining <= 0){
+      clearInterval(timerId);
+      endGame();
+    }
+  }
+
+  async function pushMyScore(){
+    await storSet(`room:${roomCode}:s:${myId}`, { name: myName, score, correct, wrong }, true);
+  }
+
+  async function refreshLeaderboard(){
+    const keys = await storList(`room:${roomCode}:s:`, true);
+    const rows = [];
+    for(const k of keys){
+      const s = await storGet(k, true);
+      if(s) rows.push({ ...s, id: k.split(':').pop() });
+    }
+    rows.sort((a, b) => b.score - a.score);
+    const html = rows.map(r =>
+      `<div class="lb-row ${r.id === myId ? 'me' : ''}"><span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+    ).join('');
+    leaderboardList.innerHTML = html;
+    endLeaderboardList.innerHTML = rows.map((r, i) =>
+      `<div class="lb-row ${r.id === myId ? 'me' : ''}"><span><span class="rank">${i+1}º</span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+    ).join('');
+  }
+
+  function finishRoomGame(){
+    endTitle.textContent = 'Corrida encerrada';
+    refreshLeaderboard();
+    let ticks = 0;
+    clearInterval(leaderboardPollId);
+    leaderboardPollId = setInterval(() => {
+      refreshLeaderboard();
+      ticks++;
+      if(ticks > 6) clearInterval(leaderboardPollId);
+    }, 1500);
+  }
+
+  startBtn.disabled = soloPicker.getOps().length === 0;
+  createRoomBtn.disabled = roomPicker.getOps().length === 0;
 })();
 </script>
 
