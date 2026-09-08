@@ -576,6 +576,7 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
   const screens = {};
@@ -594,25 +595,44 @@
   });
 
   // =========================================================
-  // Storage helpers (shared, multi-user room data)
+  // Supabase (shared, multi-user room data)
   // =========================================================
-  async function storGet(key, shared){
-    try{
-      const r = await window.storage.get(key, shared);
-      return r ? JSON.parse(r.value) : null;
-    } catch(e){ return null; }
+  const SUPABASE_URL = 'https://qnznfimqdogmtlevghsx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuem5maW1xZG9nbXRsZXZnaHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTEzMTUsImV4cCI6MjEwNDQyNzMxNX0.FABth1bTlzyPv398bJA0BPOZmW5eUmbxPMCnAqwvqHQ';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function dbCreateRoom(code, hostId, level, ops){
+    const { error } = await sb.from('game_rooms').insert({ code, host_id: hostId, level, ops, status: 'lobby' });
+    return !error;
   }
-  async function storSet(key, value, shared){
-    try{
-      await window.storage.set(key, JSON.stringify(value), shared);
-      return true;
-    } catch(e){ return false; }
+  async function dbGetRoom(code){
+    const { data, error } = await sb.from('game_rooms').select('*').eq('code', code).maybeSingle();
+    if(error) return null;
+    return data;
   }
-  async function storList(prefix, shared){
-    try{
-      const r = await window.storage.list(prefix, shared);
-      return (r && r.keys) ? r.keys : [];
-    } catch(e){ return []; }
+  async function dbStartRoom(code, level, ops, startedAtMs){
+    const { error } = await sb.from('game_rooms')
+      .update({ status: 'playing', level, ops, started_at: new Date(startedAtMs).toISOString() })
+      .eq('code', code);
+    return !error;
+  }
+  async function dbAddPlayer(id, roomCode, name){
+    const { error } = await sb.from('game_players').insert({ id, room_code: roomCode, name });
+    return !error;
+  }
+  async function dbGetPlayers(roomCode){
+    const { data, error } = await sb.from('game_players').select('*').eq('room_code', roomCode).order('joined_at', { ascending: true });
+    return error ? [] : data;
+  }
+  async function dbUpsertScore(playerId, roomCode, name, score, correct, wrong){
+    const { error } = await sb.from('game_scores').upsert({
+      player_id: playerId, room_code: roomCode, name, score, correct, wrong, updated_at: new Date().toISOString()
+    });
+    return !error;
+  }
+  async function dbGetScores(roomCode){
+    const { data, error } = await sb.from('game_scores').select('*').eq('room_code', roomCode).order('score', { ascending: false });
+    return error ? [] : data;
   }
 
   function escapeHtml(s){
@@ -895,7 +915,7 @@
     if(!name){ createError.textContent = 'Digite seu nome.'; return; }
     const roomOps = roomPicker.getOps();
     if(roomOps.length === 0){ createError.textContent = 'Selecione ao menos uma operação.'; return; }
-    createError.textContent = '';
+    createError.textContent = 'Criando sala…';
     createRoomBtn.disabled = true;
 
     myId = genId();
@@ -904,9 +924,15 @@
     roomCode = genRoomCode();
     const roomLevel = roomPicker.getLevel();
 
-    await storSet(`room:${roomCode}`, { hostId: myId, level: roomLevel, ops: roomOps, status: 'lobby', startedAt: null }, true);
-    await storSet(`room:${roomCode}:p:${myId}`, { name: myName }, true);
+    const created = await dbCreateRoom(roomCode, myId, roomLevel, roomOps);
+    if(!created){
+      createError.textContent = 'Não deu para criar a sala agora. Tente de novo.';
+      createRoomBtn.disabled = false;
+      return;
+    }
+    await dbAddPlayer(myId, roomCode, myName);
 
+    createError.textContent = '';
     createRoomBtn.disabled = false;
     enterLobby();
   });
@@ -918,7 +944,7 @@
     if(!name){ joinError.textContent = 'Digite seu nome.'; return; }
     joinError.textContent = 'Procurando sala…';
 
-    const meta = await storGet(`room:${code}`, true);
+    const meta = await dbGetRoom(code);
     if(!meta){ joinError.textContent = 'Sala não encontrada. Confira o código.'; return; }
     if(meta.status === 'playing'){ joinError.textContent = 'Essa corrida já começou. Peça uma nova sala.'; return; }
 
@@ -928,7 +954,7 @@
     myName = name;
     isHost = false;
 
-    await storSet(`room:${roomCode}:p:${myId}`, { name: myName }, true);
+    await dbAddPlayer(myId, roomCode, myName);
     enterLobby();
   });
 
@@ -944,15 +970,10 @@
   }
 
   async function refreshLobby(){
-    const meta = await storGet(`room:${roomCode}`, true);
+    const meta = await dbGetRoom(roomCode);
     if(!meta) return;
 
-    const keys = await storList(`room:${roomCode}:p:`, true);
-    const players = [];
-    for(const k of keys){
-      const p = await storGet(k, true);
-      if(p) players.push({ id: k.split(':').pop(), name: p.name });
-    }
+    const players = await dbGetPlayers(roomCode);
     lobbyCountEl.textContent = players.length;
     lobbyPlayersEl.innerHTML = players.map(p =>
       `<div class="lobby-player"><span>${escapeHtml(p.name)}</span>${p.id === myId ? '<span class="you-tag">VOCÊ</span>' : ''}</div>`
@@ -963,24 +984,20 @@
       clearInterval(lobbyPollId);
       level = meta.level;
       ops = meta.ops;
-      roomStartedAt = meta.startedAt;
+      roomStartedAt = new Date(meta.started_at).getTime();
       beginRoomGame();
     }
   }
 
   lobbyStartBtn.addEventListener('click', async () => {
     lobbyStartBtn.disabled = true;
-    const meta = await storGet(`room:${roomCode}`, true);
+    const meta = await dbGetRoom(roomCode);
     const startedAt = Date.now();
-    await storSet(`room:${roomCode}`, {
-      hostId: myId,
-      level: meta ? meta.level : 'basico',
-      ops: meta ? meta.ops : ['add','sub','mul','div'],
-      status: 'playing',
-      startedAt
-    }, true);
-    level = meta ? meta.level : 'basico';
-    ops = meta ? meta.ops : ['add','sub','mul','div'];
+    const finalLevel = meta ? meta.level : 'basico';
+    const finalOps = meta ? meta.ops : ['add','sub','mul','div'];
+    await dbStartRoom(roomCode, finalLevel, finalOps, startedAt);
+    level = finalLevel;
+    ops = finalOps;
     roomStartedAt = startedAt;
     gameStartedFromRoom = true;
     clearInterval(lobbyPollId);
@@ -1025,23 +1042,17 @@
   }
 
   async function pushMyScore(){
-    await storSet(`room:${roomCode}:s:${myId}`, { name: myName, score, correct, wrong }, true);
+    await dbUpsertScore(myId, roomCode, myName, score, correct, wrong);
   }
 
   async function refreshLeaderboard(){
-    const keys = await storList(`room:${roomCode}:s:`, true);
-    const rows = [];
-    for(const k of keys){
-      const s = await storGet(k, true);
-      if(s) rows.push({ ...s, id: k.split(':').pop() });
-    }
-    rows.sort((a, b) => b.score - a.score);
+    const rows = await dbGetScores(roomCode);
     const html = rows.map(r =>
-      `<div class="lb-row ${r.id === myId ? 'me' : ''}"><span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
     ).join('');
     leaderboardList.innerHTML = html;
     endLeaderboardList.innerHTML = rows.map((r, i) =>
-      `<div class="lb-row ${r.id === myId ? 'me' : ''}"><span><span class="rank">${i+1}º</span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span><span class="rank">${i+1}º</span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
     ).join('');
   }
 
