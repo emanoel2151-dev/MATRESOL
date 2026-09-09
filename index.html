@@ -109,6 +109,18 @@
   }
   .choice:active{ transform:scale(0.98); }
 
+  .icon-row .choice{
+    flex:0 0 auto;
+    min-width:0;
+    width:46px;
+    height:46px;
+    padding:0;
+    font-size:1.35rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
   .start-btn{
     margin-top:26px;
     width:100%;
@@ -465,6 +477,18 @@
       <input type="text" class="text-input" id="create-name-input" maxlength="18" placeholder="ex: Emanoel">
     </div>
 
+    <div class="group-label">Escolha um ícone</div>
+    <div class="choice-row icon-row" id="create-icon-row">
+      <button class="choice selected" data-icon="🦁">🦁</button>
+      <button class="choice" data-icon="🐯">🐯</button>
+      <button class="choice" data-icon="🐸">🐸</button>
+      <button class="choice" data-icon="🐵">🐵</button>
+      <button class="choice" data-icon="🐨">🐨</button>
+      <button class="choice" data-icon="🦊">🦊</button>
+      <button class="choice" data-icon="🐰">🐰</button>
+      <button class="choice" data-icon="🐼">🐼</button>
+    </div>
+
     <div class="group-label" style="margin-top:6px">Nível</div>
     <div class="choice-row" id="room-level-row">
       <button class="choice selected" data-level="basico">Básico</button>
@@ -488,6 +512,14 @@
       <button class="choice selected" data-op="order">Ordem de operações</button>
     </div>
 
+    <div class="group-label">Duração da corrida</div>
+    <div class="choice-row" id="room-duration-row">
+      <button class="choice" data-duration="30">30s</button>
+      <button class="choice selected" data-duration="60">60s</button>
+      <button class="choice" data-duration="90">90s</button>
+      <button class="choice" data-duration="120">120s</button>
+    </div>
+
     <div class="error-text" id="create-error"></div>
     <button class="start-btn" id="create-room-btn">Criar sala</button>
     <button class="back-link" data-back="screen-room-menu">Voltar</button>
@@ -507,6 +539,18 @@
       <input type="text" class="text-input" id="join-name-input" maxlength="18" placeholder="ex: Emanoel">
     </div>
 
+    <div class="group-label">Escolha um ícone</div>
+    <div class="choice-row icon-row" id="join-icon-row">
+      <button class="choice selected" data-icon="🦁">🦁</button>
+      <button class="choice" data-icon="🐯">🐯</button>
+      <button class="choice" data-icon="🐸">🐸</button>
+      <button class="choice" data-icon="🐵">🐵</button>
+      <button class="choice" data-icon="🐨">🐨</button>
+      <button class="choice" data-icon="🦊">🦊</button>
+      <button class="choice" data-icon="🐰">🐰</button>
+      <button class="choice" data-icon="🐼">🐼</button>
+    </div>
+
     <div class="error-text" id="join-error"></div>
     <button class="start-btn" id="join-room-btn">Entrar</button>
     <button class="back-link" data-back="screen-room-menu">Voltar</button>
@@ -515,6 +559,7 @@
   <!-- LOBBY -->
   <section class="section" id="screen-lobby">
     <h1>Sala de espera</h1>
+    <p class="subtitle" id="lobby-settings"></p>
     <div class="room-code-display">
       <div class="code" id="lobby-code">----</div>
       <div class="hint">compartilhe este código com quem vai competir</div>
@@ -571,7 +616,9 @@
       <div id="end-leaderboard-list"></div>
     </div>
 
-    <button class="again-btn" id="again-btn">Jogar de novo</button>
+    <button class="start-btn" id="end-primary-btn">Jogar de novo</button>
+    <div class="waiting-note" id="end-waiting-note" style="display:none">Aguardando o anfitrião…</div>
+    <button class="again-btn" id="end-exit-btn">Sair</button>
   </section>
 
 </div>
@@ -601,8 +648,8 @@
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuem5maW1xZG9nbXRsZXZnaHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NTEzMTUsImV4cCI6MjEwNDQyNzMxNX0.FABth1bTlzyPv398bJA0BPOZmW5eUmbxPMCnAqwvqHQ';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  async function dbCreateRoom(code, hostId, level, ops){
-    const { error } = await sb.from('game_rooms').insert({ code, host_id: hostId, level, ops, status: 'lobby' });
+  async function dbCreateRoom(code, hostId, level, ops, durationSeconds){
+    const { error } = await sb.from('game_rooms').insert({ code, host_id: hostId, level, ops, status: 'lobby', duration_seconds: durationSeconds });
     return !error;
   }
   async function dbGetRoom(code){
@@ -616,23 +663,31 @@
       .eq('code', code);
     return !error;
   }
-  async function dbAddPlayer(id, roomCode, name){
-    const { error } = await sb.from('game_players').insert({ id, room_code: roomCode, name });
+  async function dbAddPlayer(id, roomCode, name, icon){
+    const { error } = await sb.from('game_players').insert({ id, room_code: roomCode, name, icon });
     return !error;
   }
   async function dbGetPlayers(roomCode){
     const { data, error } = await sb.from('game_players').select('*').eq('room_code', roomCode).order('joined_at', { ascending: true });
     return error ? [] : data;
   }
-  async function dbUpsertScore(playerId, roomCode, name, score, correct, wrong){
+  async function dbDeletePlayer(playerId){
+    const { error } = await sb.from('game_players').delete().eq('id', playerId);
+    return !error;
+  }
+  async function dbUpsertScore(playerId, roomCode, name, icon, score, correct, wrong){
     const { error } = await sb.from('game_scores').upsert({
-      player_id: playerId, room_code: roomCode, name, score, correct, wrong, updated_at: new Date().toISOString()
+      player_id: playerId, room_code: roomCode, name, icon, score, correct, wrong, updated_at: new Date().toISOString()
     });
     return !error;
   }
   async function dbGetScores(roomCode){
     const { data, error } = await sb.from('game_scores').select('*').eq('room_code', roomCode).order('score', { ascending: false });
     return error ? [] : data;
+  }
+  async function dbDeleteScores(roomCode){
+    const { error } = await sb.from('game_scores').delete().eq('room_code', roomCode);
+    return !error;
   }
 
   function escapeHtml(s){
@@ -772,6 +827,23 @@
     };
   }
 
+  function setupSingleChoice(rowId, dataAttr, defaultValue){
+    const row = document.getElementById(rowId);
+    const buttons = [...row.querySelectorAll('.choice')];
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+    return {
+      getValue: () => {
+        const sel = buttons.find(b => b.classList.contains('selected'));
+        return sel ? sel.dataset[dataAttr] : defaultValue;
+      }
+    };
+  }
+
   const startBtn = document.getElementById('start-btn');
   const soloPicker = setupLevelPicker('level-row', 'basic-ops', 'adv-ops', 'basic-label', 'adv-label', () => {
     startBtn.disabled = soloPicker.getOps().length === 0;
@@ -781,6 +853,9 @@
   const roomPicker = setupLevelPicker('room-level-row', 'room-basic-ops', 'room-adv-ops', 'room-basic-label', 'room-adv-label', () => {
     createRoomBtn.disabled = roomPicker.getOps().length === 0;
   });
+  const createIconPicker = setupSingleChoice('create-icon-row', 'icon', '🦁');
+  const joinIconPicker = setupSingleChoice('join-icon-row', 'icon', '🦁');
+  const roomDurationPicker = setupSingleChoice('room-duration-row', 'duration', '60');
 
   document.getElementById('goto-room-menu-btn').addEventListener('click', () => showScreen('screen-room-menu'));
   document.getElementById('goto-create-btn').addEventListener('click', () => showScreen('screen-room-create'));
@@ -792,9 +867,9 @@
   let score = 0, correct = 0, wrong = 0, streak = 0, bestStreak = 0;
   let timeLeft = 60, timerId = null;
   let roomMode = false;
-  let roomCode = null, myId = null, myName = '', isHost = false;
-  let roomStartedAt = null;
-  let lobbyPollId = null, leaderboardPollId = null, gameStartedFromRoom = false;
+  let roomCode = null, myId = null, myName = '', myIcon = '🦁', isHost = false;
+  let roomStartedAt = null, roomDuration = 60, lastStartedAt = null;
+  let lobbyPollId = null, leaderboardPollId = null, endPollId = null, gameStartedFromRoom = false;
 
   const hudTime = document.getElementById('hud-time');
   const hudScore = document.getElementById('hud-score');
@@ -808,6 +883,7 @@
   function stopAllPolling(){
     clearInterval(lobbyPollId); lobbyPollId = null;
     clearInterval(leaderboardPollId); leaderboardPollId = null;
+    clearInterval(endPollId); endPollId = null;
     clearInterval(timerId); timerId = null;
   }
 
@@ -848,6 +924,21 @@
     document.getElementById('final-wrong').textContent = wrong;
     document.getElementById('final-best-streak').textContent = bestStreak;
     endLeaderboard.style.display = roomMode ? 'block' : 'none';
+
+    if(!roomMode){
+      endPrimaryBtn.style.display = 'block';
+      endPrimaryBtn.textContent = 'Jogar de novo';
+      endWaitingNote.style.display = 'none';
+    } else if(isHost){
+      endPrimaryBtn.style.display = 'block';
+      endPrimaryBtn.textContent = 'Jogar novamente com a sala';
+      endWaitingNote.style.display = 'none';
+    } else {
+      endPrimaryBtn.style.display = 'none';
+      endWaitingNote.style.display = 'block';
+      endWaitingNote.textContent = 'Aguardando o anfitrião iniciar outra rodada…';
+    }
+
     showScreen('screen-end');
     if(roomMode) finishRoomGame();
   }
@@ -885,9 +976,35 @@
   });
 
   startBtn.addEventListener('click', startSoloGame);
-  document.getElementById('again-btn').addEventListener('click', () => {
+
+  const endPrimaryBtn = document.getElementById('end-primary-btn');
+  const endWaitingNote = document.getElementById('end-waiting-note');
+  const endExitBtn = document.getElementById('end-exit-btn');
+
+  endPrimaryBtn.addEventListener('click', async () => {
+    if(!roomMode){
+      startSoloGame();
+      return;
+    }
+    // host: start a fresh round with the same players in the same room
+    endPrimaryBtn.disabled = true;
+    await dbDeleteScores(roomCode);
+    const startedAt = Date.now();
+    await dbStartRoom(roomCode, level, ops, startedAt);
+    roomStartedAt = startedAt;
+    lastStartedAt = startedAt;
+    clearInterval(endPollId);
+    endPrimaryBtn.disabled = false;
+    beginRoomGame();
+  });
+
+  endExitBtn.addEventListener('click', () => {
     stopAllPolling();
+    if(roomMode && myId){
+      dbDeletePlayer(myId).catch(() => {});
+    }
     roomMode = false;
+    roomCode = null;
     showScreen('screen-start');
   });
 
@@ -920,17 +1037,19 @@
 
     myId = genId();
     myName = name;
+    myIcon = createIconPicker.getValue();
     isHost = true;
     roomCode = genRoomCode();
     const roomLevel = roomPicker.getLevel();
+    roomDuration = parseInt(roomDurationPicker.getValue(), 10) || 60;
 
-    const created = await dbCreateRoom(roomCode, myId, roomLevel, roomOps);
+    const created = await dbCreateRoom(roomCode, myId, roomLevel, roomOps, roomDuration);
     if(!created){
       createError.textContent = 'Não deu para criar a sala agora. Tente de novo.';
       createRoomBtn.disabled = false;
       return;
     }
-    await dbAddPlayer(myId, roomCode, myName);
+    await dbAddPlayer(myId, roomCode, myName, myIcon);
 
     createError.textContent = '';
     createRoomBtn.disabled = false;
@@ -952,9 +1071,10 @@
     roomCode = code;
     myId = genId();
     myName = name;
+    myIcon = joinIconPicker.getValue();
     isHost = false;
 
-    await dbAddPlayer(myId, roomCode, myName);
+    await dbAddPlayer(myId, roomCode, myName, myIcon);
     enterLobby();
   });
 
@@ -973,10 +1093,13 @@
     const meta = await dbGetRoom(roomCode);
     if(!meta) return;
 
+    document.getElementById('lobby-settings').textContent =
+      `Nível ${meta.level === 'basico' ? 'básico' : 'avançado'} · corrida de ${meta.duration_seconds || 60}s`;
+
     const players = await dbGetPlayers(roomCode);
     lobbyCountEl.textContent = players.length;
     lobbyPlayersEl.innerHTML = players.map(p =>
-      `<div class="lobby-player"><span>${escapeHtml(p.name)}</span>${p.id === myId ? '<span class="you-tag">VOCÊ</span>' : ''}</div>`
+      `<div class="lobby-player"><span>${p.icon ? p.icon + ' ' : ''}${escapeHtml(p.name)}</span>${p.id === myId ? '<span class="you-tag">VOCÊ</span>' : ''}</div>`
     ).join('') || '<div class="lobby-player">Aguardando jogadores…</div>';
 
     if(meta.status === 'playing' && !gameStartedFromRoom){
@@ -984,7 +1107,9 @@
       clearInterval(lobbyPollId);
       level = meta.level;
       ops = meta.ops;
+      roomDuration = meta.duration_seconds || 60;
       roomStartedAt = new Date(meta.started_at).getTime();
+      lastStartedAt = roomStartedAt;
       beginRoomGame();
     }
   }
@@ -995,10 +1120,12 @@
     const startedAt = Date.now();
     const finalLevel = meta ? meta.level : 'basico';
     const finalOps = meta ? meta.ops : ['add','sub','mul','div'];
+    roomDuration = meta ? (meta.duration_seconds || 60) : 60;
     await dbStartRoom(roomCode, finalLevel, finalOps, startedAt);
     level = finalLevel;
     ops = finalOps;
     roomStartedAt = startedAt;
+    lastStartedAt = startedAt;
     gameStartedFromRoom = true;
     clearInterval(lobbyPollId);
     beginRoomGame();
@@ -1031,7 +1158,7 @@
 
   function updateRoomTimer(){
     const elapsed = Math.floor((Date.now() - roomStartedAt) / 1000);
-    const remaining = Math.max(0, 60 - elapsed);
+    const remaining = Math.max(0, roomDuration - elapsed);
     timeLeft = remaining;
     hudTime.textContent = remaining;
     if(remaining <= 10) hudTime.classList.add('time-low');
@@ -1042,29 +1169,38 @@
   }
 
   async function pushMyScore(){
-    await dbUpsertScore(myId, roomCode, myName, score, correct, wrong);
+    await dbUpsertScore(myId, roomCode, myName, myIcon, score, correct, wrong);
   }
 
   async function refreshLeaderboard(){
     const rows = await dbGetScores(roomCode);
     const html = rows.map(r =>
-      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span>${r.icon ? r.icon + ' ' : ''}${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
     ).join('');
     leaderboardList.innerHTML = html;
     endLeaderboardList.innerHTML = rows.map((r, i) =>
-      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span><span class="rank">${i+1}º</span>${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
+      `<div class="lb-row ${r.player_id === myId ? 'me' : ''}"><span><span class="rank">${i+1}º</span>${r.icon ? r.icon + ' ' : ''}${escapeHtml(r.name)}</span><span>${r.score}</span></div>`
     ).join('');
   }
 
   function finishRoomGame(){
     endTitle.textContent = 'Corrida encerrada';
     refreshLeaderboard();
-    let ticks = 0;
-    clearInterval(leaderboardPollId);
-    leaderboardPollId = setInterval(() => {
+    clearInterval(endPollId);
+    endPollId = setInterval(async () => {
       refreshLeaderboard();
-      ticks++;
-      if(ticks > 6) clearInterval(leaderboardPollId);
+      const meta = await dbGetRoom(roomCode);
+      if(!meta || meta.status !== 'playing') return;
+      const st = new Date(meta.started_at).getTime();
+      if(st !== lastStartedAt){
+        lastStartedAt = st;
+        level = meta.level;
+        ops = meta.ops;
+        roomDuration = meta.duration_seconds || 60;
+        roomStartedAt = st;
+        clearInterval(endPollId);
+        beginRoomGame();
+      }
     }, 1500);
   }
 
