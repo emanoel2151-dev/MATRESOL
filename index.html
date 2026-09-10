@@ -286,6 +286,13 @@
     letter-spacing:0.02em;
     word-break:break-word;
   }
+  .equation.long-text{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.15rem;
+    font-weight:600;
+    letter-spacing:normal;
+    line-height:1.4;
+  }
 
   .answer-form{
     display:flex;
@@ -444,6 +451,7 @@
       <button class="choice selected" data-op="pct">Porcentagem</button>
       <button class="choice selected" data-op="eq">Equação (x)</button>
       <button class="choice selected" data-op="order">Ordem de operações</button>
+      <button class="choice selected" data-op="logic">Raciocínio lógico</button>
     </div>
 
     <button class="start-btn" id="start-btn">Começar sozinho</button>
@@ -510,6 +518,7 @@
       <button class="choice selected" data-op="pct">Porcentagem</button>
       <button class="choice selected" data-op="eq">Equação (x)</button>
       <button class="choice selected" data-op="order">Ordem de operações</button>
+      <button class="choice selected" data-op="logic">Raciocínio lógico</button>
     </div>
 
     <div class="group-label">Duração da corrida</div>
@@ -731,7 +740,45 @@
     return { text, answer };
   }
 
+  function genLogic(){
+    const templates = ['arith_seq', 'geom_seq', 'age_multiple', 'age_diff', 'price_combo', 'group_total'];
+    const t = templates[randInt(0, templates.length - 1)];
+    switch(t){
+      case 'arith_seq': {
+        const start = randInt(1, 20), step = randInt(2, 9);
+        const terms = [start, start + step, start + 2*step, start + 3*step];
+        return { text: `${terms.join(', ')}, ?`, answer: start + 4*step };
+      }
+      case 'geom_seq': {
+        const start = randInt(1, 5), ratio = randInt(2, 3);
+        const terms = []; let v = start;
+        for(let i = 0; i < 4; i++){ terms.push(v); v *= ratio; }
+        return { text: `${terms.join(', ')}, ?`, answer: v };
+      }
+      case 'age_multiple': {
+        const b = randInt(2, 15), mult = randInt(2, 4);
+        return { text: `Ana tem ${mult}x a idade de Bia. Bia tem ${b} anos. Quantos anos tem Ana?`, answer: b * mult };
+      }
+      case 'age_diff': {
+        const b = randInt(3, 40), diff = randInt(2, 20);
+        return { text: `Caio tem ${diff} anos a mais que Duda. Duda tem ${b} anos. Quantos anos Caio tem?`, answer: b + diff };
+      }
+      case 'price_combo': {
+        const pencil = randInt(1, 10) * 2;
+        const eraser = pencil / 2;
+        const n = randInt(2, 6), m = randInt(1, 5);
+        return { text: `Um lápis custa R$${pencil}. Uma borracha custa a metade do lápis. Quanto custam ${n} lápis e ${m} borrachas juntos?`, answer: n*pencil + m*eraser };
+      }
+      case 'group_total': {
+        const boys = randInt(3, 15), mult = randInt(2, 3);
+        const girls = boys * mult;
+        return { text: `Numa turma há ${boys} meninos e ${mult === 2 ? 'o dobro' : 'o triplo'} de meninas. Quantas pessoas há na turma ao todo?`, answer: boys + girls };
+      }
+    }
+  }
+
   function genAdvanced(op){
+    if(op === 'logic') return genLogic();
     let a, b, c, answer, text;
     switch(op){
       case 'pow':
@@ -777,6 +824,7 @@
     const q = level === 'basico' ? genBasic(op) : genAdvanced(op);
     currentAnswer = q.answer;
     equationText.textContent = q.text;
+    equationText.classList.toggle('long-text', q.text.length > 20);
     answerInput.value = '';
     feedback.textContent = '';
     feedback.className = 'feedback';
