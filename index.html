@@ -416,6 +416,73 @@
   }
   .again-btn:active{ transform:scale(0.98); }
 
+  .account-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+    font-size:0.78rem;
+    color:var(--chalk-dim);
+  }
+  .mini-link{
+    background:none;
+    border:none;
+    color:var(--gold);
+    cursor:pointer;
+    font-family:inherit;
+    font-size:0.78rem;
+    font-weight:600;
+    text-decoration:underline;
+    padding:0;
+    margin-left:12px;
+  }
+
+  .end-xp-note{
+    color:var(--gold);
+    font-size:0.85rem;
+    font-weight:600;
+    margin-top:6px;
+    min-height:18px;
+  }
+
+  .profile-card{
+    text-align:center;
+    padding:20px 0 8px;
+  }
+  .profile-icon{ font-size:2.8rem; line-height:1; }
+  .profile-username{ font-weight:700; font-size:1.1rem; margin-top:6px; }
+  .profile-level{ color:var(--gold); font-size:0.85rem; margin-top:2px; margin-bottom:14px; }
+  .xp-bar{
+    height:10px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.08);
+    overflow:hidden;
+    max-width:280px;
+    margin:0 auto;
+  }
+  .xp-bar-fill{ height:100%; background:var(--gold); border-radius:5px; }
+  .xp-bar-label{ font-size:0.76rem; color:var(--chalk-dim); margin-top:6px; }
+
+  .history-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:260px;
+    overflow-y:auto;
+    margin-bottom:18px;
+  }
+  .history-row{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.82rem;
+  }
+  .history-row .hr-date{ color:var(--chalk-dim); font-size:0.72rem; }
+
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
@@ -427,6 +494,18 @@
 
   <!-- START -->
   <section class="section active" id="screen-start">
+    <div class="account-bar" id="account-bar-guest">
+      <span>Jogue sem conta ou guarde seu progresso.</span>
+      <button class="mini-link" id="account-login-btn">Entrar / criar conta</button>
+    </div>
+    <div class="account-bar" id="account-bar-user" style="display:none">
+      <span id="account-info-text"></span>
+      <span>
+        <button class="mini-link" id="account-profile-btn">Perfil</button>
+        <button class="mini-link" id="account-logout-btn">Sair</button>
+      </span>
+    </div>
+
     <h1>Quadro de Cálculo</h1>
     <p class="subtitle">Escolha o nível e responda o máximo de contas que conseguir em 60 segundos.</p>
 
@@ -613,6 +692,7 @@
     <div class="end-score">
       <div class="big" id="final-score">0</div>
       <div class="label">pontos</div>
+      <div class="end-xp-note" id="end-xp-note"></div>
     </div>
     <div class="stats-row">
       <div><div class="num" id="final-correct">0</div><div class="lab">acertos</div></div>
@@ -628,6 +708,60 @@
     <button class="start-btn" id="end-primary-btn">Jogar de novo</button>
     <div class="waiting-note" id="end-waiting-note" style="display:none">Aguardando o anfitrião…</div>
     <button class="again-btn" id="end-exit-btn">Sair</button>
+  </section>
+
+  <!-- AUTH -->
+  <section class="section" id="screen-auth">
+    <h1 id="auth-title">Entrar</h1>
+    <p class="subtitle" id="auth-subtitle">Entre com e-mail e senha para guardar seu progresso.</p>
+
+    <div class="field">
+      <label for="auth-email-input">E-mail</label>
+      <input type="email" class="text-input" id="auth-email-input" autocomplete="email">
+    </div>
+    <div class="field" id="auth-username-field" style="display:none">
+      <label for="auth-username-input">Nome de usuário</label>
+      <input type="text" class="text-input" id="auth-username-input" maxlength="18">
+    </div>
+    <div class="field">
+      <label for="auth-password-input">Senha</label>
+      <input type="password" class="text-input" id="auth-password-input" autocomplete="current-password">
+    </div>
+
+    <div class="group-label" id="auth-icon-label" style="display:none">Ícone</div>
+    <div class="choice-row" id="auth-icon-row" style="display:none">
+      <button class="choice selected" data-icon="🦁">🦁</button>
+      <button class="choice" data-icon="🐯">🐯</button>
+      <button class="choice" data-icon="🐸">🐸</button>
+      <button class="choice" data-icon="🐵">🐵</button>
+      <button class="choice" data-icon="🐨">🐨</button>
+      <button class="choice" data-icon="🦊">🦊</button>
+      <button class="choice" data-icon="🐰">🐰</button>
+      <button class="choice" data-icon="🐼">🐼</button>
+    </div>
+
+    <div class="error-text" id="auth-error"></div>
+    <button class="start-btn" id="auth-submit-btn">Entrar</button>
+    <button class="link-btn" id="auth-toggle-btn">Não tem conta? Criar uma</button>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="section" id="screen-profile">
+    <h1>Seu perfil</h1>
+    <div class="profile-card">
+      <div class="profile-icon" id="profile-icon">🦁</div>
+      <div class="profile-username" id="profile-username">—</div>
+      <div class="profile-level" id="profile-level">Nível 1</div>
+      <div class="xp-bar"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+      <div class="xp-bar-label" id="xp-bar-label">0 XP</div>
+    </div>
+
+    <div class="group-label">Histórico recente</div>
+    <div class="history-list" id="history-list"></div>
+
+    <button class="link-btn" id="profile-logout-btn">Sair da conta</button>
+    <button class="back-link" data-back="screen-start">Voltar</button>
   </section>
 
 </div>
@@ -672,8 +806,8 @@
       .eq('code', code);
     return !error;
   }
-  async function dbAddPlayer(id, roomCode, name, icon){
-    const { error } = await sb.from('game_players').insert({ id, room_code: roomCode, name, icon });
+  async function dbAddPlayer(id, roomCode, name, icon, userId){
+    const { error } = await sb.from('game_players').insert({ id, room_code: roomCode, name, icon, user_id: userId || null });
     return !error;
   }
   async function dbGetPlayers(roomCode){
@@ -684,9 +818,9 @@
     const { error } = await sb.from('game_players').delete().eq('id', playerId);
     return !error;
   }
-  async function dbUpsertScore(playerId, roomCode, name, icon, score, correct, wrong){
+  async function dbUpsertScore(playerId, roomCode, name, icon, score, correct, wrong, userId){
     const { error } = await sb.from('game_scores').upsert({
-      player_id: playerId, room_code: roomCode, name, icon, score, correct, wrong, updated_at: new Date().toISOString()
+      player_id: playerId, room_code: roomCode, name, icon, score, correct, wrong, user_id: userId || null, updated_at: new Date().toISOString()
     });
     return !error;
   }
@@ -697,6 +831,24 @@
   async function dbDeleteScores(roomCode){
     const { error } = await sb.from('game_scores').delete().eq('room_code', roomCode);
     return !error;
+  }
+
+  // ---- Auth / profile / history ----
+  async function dbGetProfile(userId){
+    const { data, error } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+    return error ? null : data;
+  }
+  async function dbUpdateXp(userId, newXp){
+    const { error } = await sb.from('profiles').update({ xp: newXp }).eq('id', userId);
+    return !error;
+  }
+  async function dbInsertHistory(row){
+    const { error } = await sb.from('game_history').insert(row);
+    return !error;
+  }
+  async function dbGetHistory(userId, limit){
+    const { data, error } = await sb.from('game_history').select('*').eq('user_id', userId).order('played_at', { ascending: false }).limit(limit);
+    return error ? [] : data;
   }
 
   function escapeHtml(s){
@@ -888,6 +1040,13 @@
       getValue: () => {
         const sel = buttons.find(b => b.classList.contains('selected'));
         return sel ? sel.dataset[dataAttr] : defaultValue;
+      },
+      setValue: (val) => {
+        const match = buttons.find(b => b.dataset[dataAttr] === String(val));
+        if(match){
+          buttons.forEach(b => b.classList.remove('selected'));
+          match.classList.add('selected');
+        }
       }
     };
   }
@@ -904,10 +1063,23 @@
   const createIconPicker = setupSingleChoice('create-icon-row', 'icon', '🦁');
   const joinIconPicker = setupSingleChoice('join-icon-row', 'icon', '🦁');
   const roomDurationPicker = setupSingleChoice('room-duration-row', 'duration', '60');
+  const authIconPicker = setupSingleChoice('auth-icon-row', 'icon', '🦁');
 
   document.getElementById('goto-room-menu-btn').addEventListener('click', () => showScreen('screen-room-menu'));
-  document.getElementById('goto-create-btn').addEventListener('click', () => showScreen('screen-room-create'));
-  document.getElementById('goto-join-btn').addEventListener('click', () => showScreen('screen-room-join'));
+  document.getElementById('goto-create-btn').addEventListener('click', () => {
+    if(currentProfile){
+      if(!createNameInput.value) createNameInput.value = currentProfile.username;
+      createIconPicker.setValue(currentProfile.icon);
+    }
+    showScreen('screen-room-create');
+  });
+  document.getElementById('goto-join-btn').addEventListener('click', () => {
+    if(currentProfile){
+      if(!joinNameInput.value) joinNameInput.value = currentProfile.username;
+      joinIconPicker.setValue(currentProfile.icon);
+    }
+    showScreen('screen-room-join');
+  });
 
   // =========================================================
   // Game state (shared by solo + room modes)
@@ -971,6 +1143,7 @@
     document.getElementById('final-correct').textContent = correct;
     document.getElementById('final-wrong').textContent = wrong;
     document.getElementById('final-best-streak').textContent = bestStreak;
+    document.getElementById('end-xp-note').textContent = '';
     endLeaderboard.style.display = roomMode ? 'block' : 'none';
 
     if(!roomMode){
@@ -985,6 +1158,10 @@
       endPrimaryBtn.style.display = 'none';
       endWaitingNote.style.display = 'block';
       endWaitingNote.textContent = 'Aguardando o anfitrião iniciar outra rodada…';
+    }
+
+    if(currentUser){
+      recordGameResult(roomMode ? 'sala' : 'solo').catch(() => {});
     }
 
     showScreen('screen-end');
@@ -1097,8 +1274,7 @@
       createRoomBtn.disabled = false;
       return;
     }
-    await dbAddPlayer(myId, roomCode, myName, myIcon);
-
+    await dbAddPlayer(myId, roomCode, myName, myIcon, currentUser ? currentUser.id : null);
     createError.textContent = '';
     createRoomBtn.disabled = false;
     enterLobby();
@@ -1122,7 +1298,7 @@
     myIcon = joinIconPicker.getValue();
     isHost = false;
 
-    await dbAddPlayer(myId, roomCode, myName, myIcon);
+    await dbAddPlayer(myId, roomCode, myName, myIcon, currentUser ? currentUser.id : null);
     enterLobby();
   });
 
@@ -1217,7 +1393,7 @@
   }
 
   async function pushMyScore(){
-    await dbUpsertScore(myId, roomCode, myName, myIcon, score, correct, wrong);
+    await dbUpsertScore(myId, roomCode, myName, myIcon, score, correct, wrong, currentUser ? currentUser.id : null);
   }
 
   async function refreshLeaderboard(){
@@ -1250,6 +1426,195 @@
         beginRoomGame();
       }
     }, 1500);
+  }
+
+  // =========================================================
+  // Auth / profile / XP / history
+  // =========================================================
+  const SOLO_DURATION = 60;
+  let currentUser = null;
+  let currentProfile = null;
+
+  const barGuest = document.getElementById('account-bar-guest');
+  const barUser = document.getElementById('account-bar-user');
+  const accountInfoText = document.getElementById('account-info-text');
+
+  function levelThresholds(lvl){
+    return { floor: 50 * Math.pow(lvl - 1, 2), next: 50 * Math.pow(lvl, 2) };
+  }
+
+  function renderAccountBar(){
+    if(currentUser && currentProfile){
+      barUser.style.display = 'flex';
+      barGuest.style.display = 'none';
+      accountInfoText.textContent = `${currentProfile.icon} ${currentProfile.username} · Nível ${currentProfile.level} · ${currentProfile.xp} XP`;
+    } else {
+      barUser.style.display = 'none';
+      barGuest.style.display = 'flex';
+    }
+  }
+
+  async function refreshProfile(){
+    if(!currentUser){ currentProfile = null; return; }
+    currentProfile = await dbGetProfile(currentUser.id);
+  }
+
+  async function handleSession(session){
+    if(session && session.user){
+      currentUser = session.user;
+      await refreshProfile();
+    } else {
+      currentUser = null;
+      currentProfile = null;
+    }
+    renderAccountBar();
+  }
+
+  sb.auth.getSession().then(({ data }) => handleSession(data.session));
+  sb.auth.onAuthStateChange((_event, session) => handleSession(session));
+
+  document.getElementById('account-login-btn').addEventListener('click', () => {
+    authError.textContent = '';
+    showScreen('screen-auth');
+  });
+  document.getElementById('account-logout-btn').addEventListener('click', () => sb.auth.signOut());
+  document.getElementById('account-profile-btn').addEventListener('click', () => {
+    showScreen('screen-profile');
+    renderProfileScreen();
+  });
+
+  // ---- Auth screen ----
+  const authTitle = document.getElementById('auth-title');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const authUsernameField = document.getElementById('auth-username-field');
+  const authIconLabel = document.getElementById('auth-icon-label');
+  const authIconRow = document.getElementById('auth-icon-row');
+  const authEmailInput = document.getElementById('auth-email-input');
+  const authUsernameInput = document.getElementById('auth-username-input');
+  const authPasswordInput = document.getElementById('auth-password-input');
+  const authError = document.getElementById('auth-error');
+  const authSubmitBtn = document.getElementById('auth-submit-btn');
+  const authToggleBtn = document.getElementById('auth-toggle-btn');
+
+  let authMode = 'login';
+  function setAuthMode(mode){
+    authMode = mode;
+    authError.textContent = '';
+    if(mode === 'login'){
+      authTitle.textContent = 'Entrar';
+      authSubtitle.textContent = 'Entre com e-mail e senha para guardar seu progresso.';
+      authUsernameField.style.display = 'none';
+      authIconLabel.style.display = 'none';
+      authIconRow.style.display = 'none';
+      authSubmitBtn.textContent = 'Entrar';
+      authToggleBtn.textContent = 'Não tem conta? Criar uma';
+    } else {
+      authTitle.textContent = 'Criar conta';
+      authSubtitle.textContent = 'Crie uma conta para acumular XP, subir de nível e ver seu histórico.';
+      authUsernameField.style.display = 'block';
+      authIconLabel.style.display = 'block';
+      authIconRow.style.display = 'flex';
+      authSubmitBtn.textContent = 'Criar conta';
+      authToggleBtn.textContent = 'Já tem conta? Entrar';
+    }
+  }
+  authToggleBtn.addEventListener('click', () => setAuthMode(authMode === 'login' ? 'signup' : 'login'));
+
+  authSubmitBtn.addEventListener('click', async () => {
+    const email = authEmailInput.value.trim();
+    const password = authPasswordInput.value;
+    if(!email || !password){ authError.textContent = 'Preencha e-mail e senha.'; return; }
+
+    authSubmitBtn.disabled = true;
+    authError.textContent = '';
+
+    if(authMode === 'login'){
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      authSubmitBtn.disabled = false;
+      if(error){ authError.textContent = 'E-mail ou senha inválidos.'; return; }
+      showScreen('screen-start');
+    } else {
+      const username = authUsernameInput.value.trim();
+      if(!username){ authError.textContent = 'Escolha um nome de usuário.'; authSubmitBtn.disabled = false; return; }
+      const icon = authIconPicker.getValue();
+      const { data, error } = await sb.auth.signUp({
+        email, password,
+        options: { data: { username, icon } }
+      });
+      authSubmitBtn.disabled = false;
+      if(error){ authError.textContent = 'Não foi possível criar a conta. ' + (error.message || ''); return; }
+      if(!data.session){
+        authError.textContent = '';
+        authTitle.textContent = 'Quase lá';
+        authSubtitle.textContent = 'Confira seu e-mail para confirmar a conta antes de entrar.';
+        return;
+      }
+      showScreen('screen-start');
+    }
+  });
+
+  // ---- Profile screen ----
+  const profileIconEl = document.getElementById('profile-icon');
+  const profileUsernameEl = document.getElementById('profile-username');
+  const profileLevelEl = document.getElementById('profile-level');
+  const xpBarFill = document.getElementById('xp-bar-fill');
+  const xpBarLabel = document.getElementById('xp-bar-label');
+  const historyList = document.getElementById('history-list');
+
+  function renderProfileScreen(){
+    if(!currentProfile) return;
+    profileIconEl.textContent = currentProfile.icon;
+    profileUsernameEl.textContent = currentProfile.username;
+    profileLevelEl.textContent = `Nível ${currentProfile.level}`;
+    const { floor, next } = levelThresholds(currentProfile.level);
+    const pct = Math.max(0, Math.min(100, Math.round(((currentProfile.xp - floor) / (next - floor)) * 100)));
+    xpBarFill.style.width = pct + '%';
+    xpBarLabel.textContent = `${currentProfile.xp} XP · faltam ${Math.max(0, next - currentProfile.xp)} para o nível ${currentProfile.level + 1}`;
+    loadHistory();
+  }
+
+  async function loadHistory(){
+    const rows = await dbGetHistory(currentUser.id, 15);
+    historyList.innerHTML = rows.map(h => {
+      const date = new Date(h.played_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const modeLabel = h.mode === 'sala' ? 'Sala' : 'Sozinho';
+      const levelLabel = h.level === 'basico' ? 'Básico' : 'Avançado';
+      return `<div class="history-row"><span>${modeLabel} · ${levelLabel} <span class="hr-date">${date}</span></span><span>${h.score} pts</span></div>`;
+    }).join('') || '<div class="history-row">Nenhuma partida registrada ainda.</div>';
+  }
+
+  document.getElementById('profile-logout-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    showScreen('screen-start');
+  });
+
+  // ---- Record XP + history after a match ----
+  async function recordGameResult(mode){
+    if(!currentUser || !currentProfile) return;
+    const xpEarned = score;
+    const prevLevel = currentProfile.level;
+
+    await dbInsertHistory({
+      user_id: currentUser.id,
+      mode,
+      room_code: roomMode ? roomCode : null,
+      level,
+      ops,
+      duration_seconds: roomMode ? roomDuration : SOLO_DURATION,
+      score, correct, wrong,
+      best_streak: bestStreak,
+      xp_earned: xpEarned
+    });
+
+    await dbUpdateXp(currentUser.id, currentProfile.xp + xpEarned);
+    await refreshProfile();
+    renderAccountBar();
+
+    const note = document.getElementById('end-xp-note');
+    if(note){
+      const leveledUp = currentProfile && currentProfile.level > prevLevel;
+      note.textContent = `+${xpEarned} XP` + (leveledUp ? ` · subiu para o nível ${currentProfile.level}! 🎉` : '');
+    }
   }
 
   startBtn.disabled = soloPicker.getOps().length === 0;
