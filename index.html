@@ -294,34 +294,37 @@
     line-height:1.4;
   }
 
-  .answer-form{
-    display:flex;
+  .answer-options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:10px;
   }
-  #answer-input{
-    flex:1;
+  .option-btn{
     font-family:'JetBrains Mono', monospace;
-    font-size:1.2rem;
-    background:transparent;
-    border:1.5px solid rgba(241,238,226,0.3);
-    border-radius:5px;
-    color:var(--chalk);
-    padding:12px 14px;
-    outline:none;
-    transition:border-color .15s ease;
-  }
-  #answer-input:focus{ border-color:var(--gold); }
-  .submit-btn{
-    padding:0 22px;
-    border-radius:5px;
-    border:none;
-    background:var(--gold);
-    color:#1c1406;
+    font-size:1.15rem;
     font-weight:700;
-    font-family:inherit;
+    background:rgba(241,238,226,0.03);
+    border:1.5px solid rgba(241,238,226,0.25);
+    border-radius:6px;
+    color:var(--chalk);
+    padding:16px 10px;
+    min-height:52px;
     cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
   }
-  .submit-btn:active{ transform:scale(0.97); }
+  .option-btn:hover:not(:disabled){ border-color:var(--gold); }
+  .option-btn:active:not(:disabled){ transform:scale(0.97); }
+  .option-btn:disabled{ cursor:default; }
+  .option-btn.correct{
+    border-color:var(--green);
+    background:rgba(131,176,107,0.15);
+    color:var(--green);
+  }
+  .option-btn.wrong{
+    border-color:var(--red);
+    background:rgba(193,88,76,0.15);
+    color:var(--red);
+  }
 
   .feedback{
     min-height:20px;
@@ -485,6 +488,21 @@
 
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
+  }
+
+  @media (max-width: 480px){
+    body{ padding:10px; align-items:flex-start; }
+    .frame{ padding:22px 16px 18px; border-width:8px; }
+    h1{ font-size:1.3rem; }
+    .subtitle{ font-size:0.85rem; margin-bottom:16px; }
+    .choice{ min-width:84px; font-size:0.82rem; padding:10px 8px; }
+    .equation-box{ padding:24px 12px; }
+    .equation{ font-size:1.6rem; }
+    .equation.long-text{ font-size:1rem; }
+    .option-btn{ font-size:1.05rem; padding:14px 8px; min-height:48px; }
+    .room-code-display .code{ font-size:1.8rem; }
+    .hud{ font-size:0.74rem; }
+    .end-score .big{ font-size:2.5rem; }
   }
 </style>
 </head>
@@ -673,9 +691,11 @@
       <div class="equation" id="equation-text">—</div>
     </div>
 
-    <div class="answer-form" id="answer-form">
-      <input type="text" inputmode="decimal" autocomplete="off" id="answer-input" placeholder="sua resposta">
-      <button type="button" class="submit-btn" id="submit-btn">Enviar</button>
+    <div class="answer-options" id="answer-options">
+      <button type="button" class="option-btn" data-idx="0"></button>
+      <button type="button" class="option-btn" data-idx="1"></button>
+      <button type="button" class="option-btn" data-idx="2"></button>
+      <button type="button" class="option-btn" data-idx="3"></button>
     </div>
 
     <div class="feedback" id="feedback"></div>
@@ -963,13 +983,47 @@
     return { text, answer };
   }
 
+  function shuffleArray(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = randInt(0, i);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function formatNum(n){
+    const rounded = Math.round(n * 10) / 10;
+    return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace('.', ',');
+  }
+
+  function genDistractors(correct, count){
+    const isInt = Number.isInteger(correct);
+    const scale = isInt ? 1 : 10;
+    const correctScaled = Math.round(correct * scale);
+    const magnitude = Math.max(scale, Math.abs(correctScaled));
+    const set = new Set([correctScaled]);
+    let attempts = 0;
+    while(set.size < count + 1 && attempts < 60){
+      attempts++;
+      const offset = randInt(1, Math.max(3, Math.round(magnitude * 0.35)));
+      const candidate = correctScaled + (Math.random() < 0.5 ? -1 : 1) * offset;
+      if(!set.has(candidate)) set.add(candidate);
+    }
+    let fb = 1;
+    while(set.size < count + 1){
+      if(!set.has(correctScaled + fb)) set.add(correctScaled + fb);
+      fb++;
+    }
+    return shuffleArray([...set]).map(v => v / scale);
+  }
+
   let level = 'basico';
   let ops = [];
   let currentAnswer = null;
 
   const equationText = document.getElementById('equation-text');
-  const answerInput = document.getElementById('answer-input');
   const feedback = document.getElementById('feedback');
+  const optionButtons = [...document.querySelectorAll('.option-btn')];
 
   function nextQuestion(){
     const op = ops[randInt(0, ops.length - 1)];
@@ -977,10 +1031,16 @@
     currentAnswer = q.answer;
     equationText.textContent = q.text;
     equationText.classList.toggle('long-text', q.text.length > 20);
-    answerInput.value = '';
     feedback.textContent = '';
     feedback.className = 'feedback';
-    answerInput.focus();
+
+    const options = genDistractors(q.answer, 3);
+    optionButtons.forEach((btn, i) => {
+      btn.textContent = formatNum(options[i]);
+      btn.dataset.value = options[i];
+      btn.disabled = false;
+      btn.classList.remove('correct', 'wrong');
+    });
   }
 
   // =========================================================
@@ -1168,13 +1228,16 @@
     if(roomMode) finishRoomGame();
   }
 
-  function submitAnswer(){
+  function selectAnswer(val, btnEl){
     if(currentAnswer === null || timeLeft <= 0) return;
-    const raw = answerInput.value.trim().replace(',', '.');
-    const val = parseFloat(raw);
-    if(isNaN(val)) return;
+    optionButtons.forEach(b => b.disabled = true);
 
     const isCorrect = Math.abs(val - currentAnswer) < 0.001;
+    optionButtons.forEach(b => {
+      if(Math.abs(parseFloat(b.dataset.value) - currentAnswer) < 0.001) b.classList.add('correct');
+    });
+    if(!isCorrect) btnEl.classList.add('wrong');
+
     if(isCorrect){
       correct++;
       streak++;
@@ -1186,18 +1249,17 @@
     } else {
       wrong++;
       streak = 0;
-      feedback.textContent = `Errado — resposta: ${currentAnswer}`;
+      feedback.textContent = `Errado — resposta: ${formatNum(currentAnswer)}`;
       feedback.className = 'feedback wrong';
     }
     hudScore.textContent = score;
     hudStreak.textContent = streak;
     if(roomMode) pushMyScore();
-    setTimeout(nextQuestion, isCorrect ? 350 : 750);
+    setTimeout(nextQuestion, isCorrect ? 450 : 950);
   }
 
-  document.getElementById('submit-btn').addEventListener('click', submitAnswer);
-  answerInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); submitAnswer(); }
+  optionButtons.forEach(btn => {
+    btn.addEventListener('click', () => selectAnswer(parseFloat(btn.dataset.value), btn));
   });
 
   startBtn.addEventListener('click', startSoloGame);
