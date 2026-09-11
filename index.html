@@ -1528,28 +1528,33 @@
     authSubmitBtn.disabled = true;
     authError.textContent = '';
 
-    if(authMode === 'login'){
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      authSubmitBtn.disabled = false;
-      if(error){ authError.textContent = 'E-mail ou senha inválidos.'; return; }
-      showScreen('screen-start');
-    } else {
-      const username = authUsernameInput.value.trim();
-      if(!username){ authError.textContent = 'Escolha um nome de usuário.'; authSubmitBtn.disabled = false; return; }
-      const icon = authIconPicker.getValue();
-      const { data, error } = await sb.auth.signUp({
-        email, password,
-        options: { data: { username, icon } }
-      });
-      authSubmitBtn.disabled = false;
-      if(error){ authError.textContent = 'Não foi possível criar a conta. ' + (error.message || ''); return; }
-      if(!data.session){
-        authError.textContent = '';
-        authTitle.textContent = 'Quase lá';
-        authSubtitle.textContent = 'Confira seu e-mail para confirmar a conta antes de entrar.';
-        return;
+    try{
+      if(authMode === 'login'){
+        const { error } = await sb.auth.signInWithPassword({ email, password });
+        if(error){ authError.textContent = 'E-mail ou senha inválidos.'; return; }
+        showScreen('screen-start');
+      } else {
+        const username = authUsernameInput.value.trim();
+        if(!username){ authError.textContent = 'Escolha um nome de usuário.'; return; }
+        const icon = authIconPicker.getValue();
+        const { data, error } = await sb.auth.signUp({
+          email, password,
+          options: { data: { username, icon } }
+        });
+        if(error){ authError.textContent = 'Não foi possível criar a conta. ' + (error.message || ''); return; }
+        if(!data.session){
+          authError.textContent = '';
+          authTitle.textContent = 'Quase lá';
+          authSubtitle.textContent = 'Confira seu e-mail para confirmar a conta antes de entrar.';
+          return;
+        }
+        showScreen('screen-start');
       }
-      showScreen('screen-start');
+    } catch(err){
+      authError.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+      console.error('auth error', err);
+    } finally {
+      authSubmitBtn.disabled = false;
     }
   });
 
