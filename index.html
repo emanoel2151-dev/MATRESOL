@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quadro de Cálculo</title>
+<title>MATRESOL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -573,6 +573,72 @@
     margin-bottom:14px;
   }
 
+  .class-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin:12px 0 18px;
+  }
+  .class-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.85rem;
+    cursor:pointer;
+  }
+  .class-row:hover{ border-color:var(--gold); }
+  .class-row .cr-code{
+    font-family:'JetBrains Mono', monospace;
+    color:var(--gold);
+    font-weight:700;
+    letter-spacing:0.1em;
+    font-size:0.76rem;
+  }
+
+  .report-summary{
+    background:rgba(217,164,65,0.06);
+    border:1.5px dashed rgba(217,164,65,0.4);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+  .report-summary .rs-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.85rem;
+    padding:4px 0;
+  }
+  .report-student-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .report-student-row{
+    padding:10px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.82rem;
+  }
+  .report-student-row .rsr-top{
+    display:flex;
+    justify-content:space-between;
+    font-weight:700;
+    margin-bottom:4px;
+  }
+  .report-student-row .rsr-stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    color:var(--chalk-dim);
+    font-size:0.74rem;
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
@@ -618,6 +684,7 @@
       <button class="nav-btn" id="goto-ranking-btn">🏆 Ranking</button>
       <button class="nav-btn" id="goto-achievements-btn">🎖️ Conquistas</button>
       <button class="nav-btn" id="goto-daily-btn">📅 Desafio diário</button>
+      <button class="nav-btn" id="goto-class-btn">🏫 Turma</button>
     </div>
 
     <div class="group-label">Nível</div>
@@ -841,6 +908,12 @@
       <input type="password" class="text-input" id="auth-password-input" autocomplete="current-password">
     </div>
 
+    <div class="group-label" id="auth-role-label" style="display:none">Você é...</div>
+    <div class="choice-row" id="auth-role-row" style="display:none">
+      <button class="choice selected" data-role="aluno">🎓 Aluno</button>
+      <button class="choice" data-role="professor">👨‍🏫 Professor</button>
+    </div>
+
     <div class="group-label" id="auth-icon-label" style="display:none">Ícone</div>
     <div class="choice-row" id="auth-icon-row" style="display:none">
       <button class="choice selected" data-icon="🦁">🦁</button>
@@ -917,6 +990,53 @@
     <div class="ranking-list" id="daily-ranking-list"></div>
 
     <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- TEACHER PANEL -->
+  <section class="section" id="screen-teacher-panel">
+    <h1>Painel do professor</h1>
+    <button class="start-btn" id="create-class-btn">+ Criar turma</button>
+    <div class="group-label">Suas turmas</div>
+    <div class="class-list" id="teacher-class-list"></div>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- CREATE CLASS -->
+  <section class="section" id="screen-create-class">
+    <h1>Criar turma</h1>
+    <div class="field">
+      <label for="class-name-input">Nome da turma</label>
+      <input type="text" class="text-input" id="class-name-input" maxlength="40" placeholder="ex: 7º Ano B">
+    </div>
+    <div class="error-text" id="class-create-error"></div>
+    <button class="start-btn" id="class-create-submit-btn">Criar</button>
+    <button class="back-link" data-back="screen-teacher-panel">Voltar</button>
+  </section>
+
+  <!-- JOIN CLASS (student) -->
+  <section class="section" id="screen-join-class">
+    <h1>Entrar em turma</h1>
+    <div class="field">
+      <label for="join-class-code-input">Código da turma</label>
+      <input type="text" class="text-input" id="join-class-code-input" maxlength="6" style="text-transform:uppercase; letter-spacing:0.15em;" placeholder="ex: K7QXPM">
+    </div>
+    <div class="error-text" id="join-class-error"></div>
+    <button class="start-btn" id="join-class-submit-btn">Entrar</button>
+
+    <div class="group-label">Suas turmas</div>
+    <div class="class-list" id="student-class-list"></div>
+
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- CLASS REPORT (teacher) -->
+  <section class="section" id="screen-class-report">
+    <h1 id="report-class-name">Turma</h1>
+    <p class="subtitle" id="report-class-code"></p>
+    <div class="report-summary" id="report-summary"></div>
+    <div class="group-label">Alunos</div>
+    <div class="report-student-list" id="report-student-list"></div>
+    <button class="back-link" data-back="screen-teacher-panel">Voltar</button>
   </section>
 
 </div>
@@ -1062,6 +1182,42 @@
   async function dbGetProfilesByIds(ids){
     if(ids.length === 0) return [];
     const { data, error } = await sb.from('profiles').select('*').in('id', ids);
+    return error ? [] : data;
+  }
+
+  // ---- Classes (teacher panel) ----
+  async function dbCreateClass(teacherId, name, code){
+    const { error } = await sb.from('classes').insert({ teacher_id: teacherId, name, class_code: code });
+    return !error;
+  }
+  async function dbGetClassesByTeacher(teacherId){
+    const { data, error } = await sb.from('classes').select('*').eq('teacher_id', teacherId).order('created_at', { ascending: false });
+    return error ? [] : data;
+  }
+  async function dbGetClassByCode(code){
+    const { data, error } = await sb.from('classes').select('*').eq('class_code', code).maybeSingle();
+    return error ? null : data;
+  }
+  async function dbGetClassesByIds(ids){
+    if(ids.length === 0) return [];
+    const { data, error } = await sb.from('classes').select('*').in('id', ids);
+    return error ? [] : data;
+  }
+  async function dbJoinClass(classId, studentId){
+    const { error } = await sb.from('class_students').insert({ class_id: classId, student_id: studentId });
+    return !error;
+  }
+  async function dbGetClassStudents(classId){
+    const { data, error } = await sb.from('class_students').select('*').eq('class_id', classId);
+    return error ? [] : data;
+  }
+  async function dbGetMyClassMemberships(studentId){
+    const { data, error } = await sb.from('class_students').select('*').eq('student_id', studentId);
+    return error ? [] : data;
+  }
+  async function dbGetHistoryForUsers(userIds){
+    if(userIds.length === 0) return [];
+    const { data, error } = await sb.from('game_history').select('user_id, score, correct, wrong, played_at').in('user_id', userIds);
     return error ? [] : data;
   }
 
@@ -1318,6 +1474,7 @@
   const joinIconPicker = setupSingleChoice('join-icon-row', 'icon', '🦁');
   const roomDurationPicker = setupSingleChoice('room-duration-row', 'duration', '60');
   const authIconPicker = setupSingleChoice('auth-icon-row', 'icon', '🦁');
+  const authRolePicker = setupSingleChoice('auth-role-row', 'role', 'aluno');
 
   document.getElementById('goto-room-menu-btn').addEventListener('click', () => showScreen('screen-room-menu'));
   document.getElementById('goto-create-btn').addEventListener('click', () => {
@@ -1812,6 +1969,8 @@
   const authUsernameField = document.getElementById('auth-username-field');
   const authIconLabel = document.getElementById('auth-icon-label');
   const authIconRow = document.getElementById('auth-icon-row');
+  const authRoleLabel = document.getElementById('auth-role-label');
+  const authRoleRow = document.getElementById('auth-role-row');
   const authEmailInput = document.getElementById('auth-email-input');
   const authUsernameInput = document.getElementById('auth-username-input');
   const authPasswordInput = document.getElementById('auth-password-input');
@@ -1829,6 +1988,8 @@
       authUsernameField.style.display = 'none';
       authIconLabel.style.display = 'none';
       authIconRow.style.display = 'none';
+      authRoleLabel.style.display = 'none';
+      authRoleRow.style.display = 'none';
       authSubmitBtn.textContent = 'Entrar';
       authToggleBtn.textContent = 'Não tem conta? Criar uma';
     } else {
@@ -1837,6 +1998,8 @@
       authUsernameField.style.display = 'block';
       authIconLabel.style.display = 'block';
       authIconRow.style.display = 'flex';
+      authRoleLabel.style.display = 'block';
+      authRoleRow.style.display = 'flex';
       authSubmitBtn.textContent = 'Criar conta';
       authToggleBtn.textContent = 'Já tem conta? Entrar';
     }
@@ -1860,9 +2023,10 @@
         const username = authUsernameInput.value.trim();
         if(!username){ authError.textContent = 'Escolha um nome de usuário.'; return; }
         const icon = authIconPicker.getValue();
+        const role = authRolePicker.getValue();
         const { data, error } = await sb.auth.signUp({
           email, password,
-          options: { data: { username, icon } }
+          options: { data: { username, icon, role } }
         });
         if(error){ authError.textContent = 'Não foi possível criar a conta. ' + (error.message || ''); return; }
         if(!data.session){
@@ -2134,6 +2298,182 @@
   });
   document.getElementById('daily-play-btn').addEventListener('click', startDailyGame);
   document.getElementById('daily-login-btn').addEventListener('click', () => showScreen('screen-auth'));
+
+  // =========================================================
+  // Classes (teacher panel / student join / reports)
+  // =========================================================
+  let selectedClassId = null;
+
+  function genClassCode(){
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for(let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+  }
+
+  document.getElementById('goto-class-btn').addEventListener('click', () => {
+    if(!currentUser){ showScreen('screen-auth'); return; }
+    if(currentProfile && currentProfile.role === 'professor'){
+      showScreen('screen-teacher-panel');
+      renderTeacherPanel();
+    } else {
+      showScreen('screen-join-class');
+      renderJoinClassScreen();
+    }
+  });
+
+  // ---- Teacher panel ----
+  async function renderTeacherPanel(){
+    const list = document.getElementById('teacher-class-list');
+    const classes = await dbGetClassesByTeacher(currentUser.id);
+    if(classes.length === 0){
+      list.innerHTML = '<div class="class-row">Nenhuma turma criada ainda.</div>';
+      return;
+    }
+    const rows = [];
+    for(const c of classes){
+      const students = await dbGetClassStudents(c.id);
+      rows.push(`<div class="class-row" data-class-id="${c.id}"><span>${escapeHtml(c.name)}<br><span class="cr-code">${c.class_code}</span></span><span>${students.length} aluno${students.length !== 1 ? 's' : ''}</span></div>`);
+    }
+    list.innerHTML = rows.join('');
+    list.querySelectorAll('.class-row[data-class-id]').forEach(row => {
+      row.addEventListener('click', () => openClassReport(parseInt(row.dataset.classId, 10)));
+    });
+  }
+
+  document.getElementById('create-class-btn').addEventListener('click', () => {
+    document.getElementById('class-name-input').value = '';
+    document.getElementById('class-create-error').textContent = '';
+    showScreen('screen-create-class');
+  });
+
+  document.getElementById('class-create-submit-btn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('class-name-input');
+    const errEl = document.getElementById('class-create-error');
+    const btn = document.getElementById('class-create-submit-btn');
+    const name = nameInput.value.trim();
+    if(!name){ errEl.textContent = 'Digite um nome para a turma.'; return; }
+
+    btn.disabled = true;
+    errEl.textContent = '';
+    try{
+      const code = genClassCode();
+      const ok = await dbCreateClass(currentUser.id, name, code);
+      if(!ok){ errEl.textContent = 'Não foi possível criar a turma. Tente de novo.'; return; }
+      showScreen('screen-teacher-panel');
+      await renderTeacherPanel();
+    } catch(err){
+      errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- Student: join class ----
+  document.getElementById('join-class-code-input').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  });
+
+  async function renderMyClasses(){
+    const memberships = await dbGetMyClassMemberships(currentUser.id);
+    const classes = await dbGetClassesByIds(memberships.map(m => m.class_id));
+    const list = document.getElementById('student-class-list');
+    list.innerHTML = classes.map(c => `<div class="class-row"><span>${escapeHtml(c.name)}</span></div>`).join('')
+      || '<div class="class-row">Você ainda não entrou em nenhuma turma.</div>';
+  }
+
+  async function renderJoinClassScreen(){
+    document.getElementById('join-class-code-input').value = '';
+    document.getElementById('join-class-error').textContent = '';
+    await renderMyClasses();
+  }
+
+  document.getElementById('join-class-submit-btn').addEventListener('click', async () => {
+    const codeInput = document.getElementById('join-class-code-input');
+    const errEl = document.getElementById('join-class-error');
+    const btn = document.getElementById('join-class-submit-btn');
+    const code = codeInput.value.trim();
+    if(code.length !== 6){ errEl.textContent = 'Digite o código de 6 caracteres.'; return; }
+
+    btn.disabled = true;
+    errEl.textContent = '';
+    try{
+      const cls = await dbGetClassByCode(code);
+      if(!cls){ errEl.textContent = 'Turma não encontrada. Confira o código.'; return; }
+      const ok = await dbJoinClass(cls.id, currentUser.id);
+      if(!ok){ errEl.textContent = 'Não foi possível entrar (talvez você já esteja na turma).'; return; }
+      codeInput.value = '';
+      await renderMyClasses();
+    } catch(err){
+      errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ---- Class report (teacher) ----
+  async function openClassReport(classId){
+    selectedClassId = classId;
+    showScreen('screen-class-report');
+    await renderClassReport();
+  }
+
+  async function renderClassReport(){
+    const classes = await dbGetClassesByTeacher(currentUser.id);
+    const cls = classes.find(c => c.id === selectedClassId);
+    if(!cls) return;
+    document.getElementById('report-class-name').textContent = cls.name;
+    document.getElementById('report-class-code').textContent = `Código: ${cls.class_code}`;
+
+    const memberships = await dbGetClassStudents(selectedClassId);
+    const studentIds = memberships.map(m => m.student_id);
+    const profiles = await dbGetProfilesByIds(studentIds);
+    const history = await dbGetHistoryForUsers(studentIds);
+
+    const byUser = new Map();
+    studentIds.forEach(id => byUser.set(id, { games: 0, correct: 0, wrong: 0, bestScore: 0, lastPlayed: null }));
+    for(const h of history){
+      const s = byUser.get(h.user_id);
+      if(!s) continue;
+      s.games++;
+      s.correct += h.correct || 0;
+      s.wrong += h.wrong || 0;
+      s.bestScore = Math.max(s.bestScore, h.score || 0);
+      if(!s.lastPlayed || new Date(h.played_at) > new Date(s.lastPlayed)) s.lastPlayed = h.played_at;
+    }
+
+    const totalCorrect = history.reduce((sum, h) => sum + (h.correct || 0), 0);
+    const totalWrong = history.reduce((sum, h) => sum + (h.wrong || 0), 0);
+    const avgAccuracy = (totalCorrect + totalWrong) > 0 ? Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+
+    document.getElementById('report-summary').innerHTML = `
+      <div class="rs-row"><span>Alunos</span><strong>${studentIds.length}</strong></div>
+      <div class="rs-row"><span>Partidas jogadas</span><strong>${history.length}</strong></div>
+      <div class="rs-row"><span>% de acerto da turma</span><strong>${avgAccuracy}%</strong></div>
+    `;
+
+    const list = document.getElementById('report-student-list');
+    if(studentIds.length === 0){
+      list.innerHTML = '<div class="report-student-row">Nenhum aluno entrou ainda. Compartilhe o código.</div>';
+      return;
+    }
+    list.innerHTML = studentIds.map(id => {
+      const p = profiles.find(pr => pr.id === id);
+      const s = byUser.get(id);
+      const acc = (s.correct + s.wrong) > 0 ? Math.round((s.correct / (s.correct + s.wrong)) * 100) : 0;
+      const lastDate = s.lastPlayed ? new Date(s.lastPlayed).toLocaleDateString('pt-BR') : '—';
+      return `
+        <div class="report-student-row">
+          <div class="rsr-top"><span>${p ? p.icon : '🙂'} ${escapeHtml(p ? p.username : '???')}</span><span>Nível ${p ? p.level : 1}</span></div>
+          <div class="rsr-stats">
+            <span>${s.games} partidas</span>
+            <span>${acc}% acerto</span>
+            <span>Melhor: ${s.bestScore}</span>
+            <span>Última vez: ${lastDate}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
 
   startBtn.disabled = soloPicker.getOps().length === 0;
   createRoomBtn.disabled = roomPicker.getOps().length === 0;
