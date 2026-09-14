@@ -486,6 +486,93 @@
   }
   .history-row .hr-date{ color:var(--chalk-dim); font-size:0.72rem; }
 
+  .nav-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+  }
+  .nav-btn{
+    flex:1;
+    background:transparent;
+    border:1px solid rgba(241,238,226,0.18);
+    border-radius:5px;
+    color:var(--chalk-dim);
+    font-family:inherit;
+    font-size:0.74rem;
+    font-weight:600;
+    padding:9px 4px;
+    cursor:pointer;
+    text-align:center;
+  }
+  .nav-btn:hover{ border-color:var(--gold); color:var(--gold); }
+
+  .ranking-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-height:320px;
+    overflow-y:auto;
+    margin:14px 0 18px;
+  }
+  .ranking-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.85rem;
+  }
+  .ranking-row.me{ border-color:var(--gold); background:rgba(217,164,65,0.1); }
+  .ranking-row .rk-pos{ color:var(--chalk-dim); width:24px; font-family:'JetBrains Mono', monospace; }
+  .ranking-row .rk-name{ flex:1; }
+  .ranking-row .rk-sub{ color:var(--chalk-dim); font-size:0.72rem; }
+  .ranking-row .rk-val{ font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--gold); }
+  .my-rank-note{ font-size:0.8rem; color:var(--chalk-dim); margin-top:12px; }
+
+  .achv-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .achv-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px;
+    border-radius:6px;
+    background:rgba(241,238,226,0.03);
+    border:1px solid rgba(241,238,226,0.1);
+  }
+  .achv-row.unlocked{ border-color:var(--gold); background:rgba(217,164,65,0.08); }
+  .achv-row.locked{ opacity:0.5; }
+  .achv-icon{ font-size:1.6rem; line-height:1; }
+  .achv-name{ font-weight:700; font-size:0.9rem; }
+  .achv-desc{ font-size:0.76rem; color:var(--chalk-dim); margin-top:2px; }
+
+  .daily-card{
+    background:rgba(217,164,65,0.06);
+    border:1.5px dashed rgba(217,164,65,0.4);
+    border-radius:6px;
+    padding:14px 16px;
+    margin-bottom:16px;
+  }
+  .daily-card-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.85rem;
+    padding:4px 0;
+  }
+  .daily-status{
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--green);
+    font-weight:600;
+    margin-bottom:14px;
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
@@ -526,6 +613,12 @@
 
     <h1>Quadro de Cálculo</h1>
     <p class="subtitle">Escolha o nível e responda o máximo de contas que conseguir em 60 segundos.</p>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="goto-ranking-btn">🏆 Ranking</button>
+      <button class="nav-btn" id="goto-achievements-btn">🎖️ Conquistas</button>
+      <button class="nav-btn" id="goto-daily-btn">📅 Desafio diário</button>
+    </div>
 
     <div class="group-label">Nível</div>
     <div class="choice-row" id="level-row">
@@ -784,6 +877,48 @@
     <button class="back-link" data-back="screen-start">Voltar</button>
   </section>
 
+  <!-- RANKING -->
+  <section class="section" id="screen-ranking">
+    <h1>Ranking global</h1>
+    <div class="choice-row" id="ranking-tab-row">
+      <button class="choice selected" data-tab="xp">Por XP</button>
+      <button class="choice" data-tab="score">Melhor pontuação</button>
+    </div>
+    <div class="my-rank-note" id="my-rank-note"></div>
+    <div class="ranking-list" id="ranking-list"></div>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- ACHIEVEMENTS -->
+  <section class="section" id="screen-achievements">
+    <h1>Conquistas</h1>
+    <p class="subtitle" id="achievements-subtitle">Entre na sua conta para acompanhar suas conquistas.</p>
+    <div class="achv-list" id="achv-list"></div>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- DAILY CHALLENGE -->
+  <section class="section" id="screen-daily">
+    <h1>Desafio de hoje</h1>
+    <p class="subtitle" id="daily-subtitle">Entre na sua conta para jogar o desafio diário.</p>
+
+    <div class="daily-card" id="daily-card" style="display:none">
+      <div class="daily-card-row"><span>Nível</span><strong id="daily-level">—</strong></div>
+      <div class="daily-card-row"><span>Duração</span><strong id="daily-duration">—</strong></div>
+      <div class="daily-card-row"><span>Meta</span><strong id="daily-target">—</strong></div>
+    </div>
+
+    <div class="daily-status" id="daily-status" style="display:none"></div>
+
+    <button class="start-btn" id="daily-play-btn" style="display:none">Jogar desafio de hoje</button>
+    <button class="start-btn" id="daily-login-btn" style="display:none">Entrar / criar conta</button>
+
+    <div class="group-label">Ranking de hoje</div>
+    <div class="ranking-list" id="daily-ranking-list"></div>
+
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -868,6 +1003,65 @@
   }
   async function dbGetHistory(userId, limit){
     const { data, error } = await sb.from('game_history').select('*').eq('user_id', userId).order('played_at', { ascending: false }).limit(limit);
+    return error ? [] : data;
+  }
+  async function dbGetUserStats(userId){
+    const { data, error } = await sb.from('game_history').select('correct, best_streak, level, room_rank').eq('user_id', userId);
+    return error ? [] : data;
+  }
+  async function dbUpdateBestScore(userId, newBestScore){
+    const { error } = await sb.from('profiles').update({ best_score: newBestScore }).eq('id', userId);
+    return !error;
+  }
+
+  // ---- Ranking ----
+  async function dbGetTopByXp(limit){
+    const { data, error } = await sb.from('profiles').select('*').order('xp', { ascending: false }).limit(limit);
+    return error ? [] : data;
+  }
+  async function dbGetTopByBestScore(limit){
+    const { data, error } = await sb.from('profiles').select('*').order('best_score', { ascending: false }).limit(limit);
+    return error ? [] : data;
+  }
+  async function dbCountAbove(column, value){
+    const { count, error } = await sb.from('profiles').select('id', { count: 'exact', head: true }).gt(column, value);
+    return error ? null : count;
+  }
+
+  // ---- Achievements ----
+  async function dbGetAchievements(){
+    const { data, error } = await sb.from('achievements').select('*');
+    return error ? [] : data;
+  }
+  async function dbGetUserAchievements(userId){
+    const { data, error } = await sb.from('user_achievements').select('*').eq('user_id', userId);
+    return error ? [] : data;
+  }
+  async function dbUnlockAchievement(userId, code){
+    const { error } = await sb.from('user_achievements').insert({ user_id: userId, achievement_code: code });
+    return !error;
+  }
+
+  // ---- Daily challenge ----
+  async function dbGetDailyProgress(userId, dateStr){
+    const { data, error } = await sb.from('daily_progress').select('*').eq('user_id', userId).eq('challenge_date', dateStr).maybeSingle();
+    return error ? null : data;
+  }
+  async function dbGetDailyStreak(userId){
+    const { data, error } = await sb.from('daily_progress').select('challenge_date, completed').eq('user_id', userId).eq('completed', true).order('challenge_date', { ascending: false }).limit(60);
+    return error ? [] : data;
+  }
+  async function dbUpsertDailyProgress(row){
+    const { error } = await sb.from('daily_progress').upsert(row);
+    return !error;
+  }
+  async function dbGetDailyLeaderboard(dateStr, limit){
+    const { data, error } = await sb.from('daily_progress').select('*').eq('challenge_date', dateStr).order('score', { ascending: false }).limit(limit);
+    return error ? [] : data;
+  }
+  async function dbGetProfilesByIds(ids){
+    if(ids.length === 0) return [];
+    const { data, error } = await sb.from('profiles').select('*').in('id', ids);
     return error ? [] : data;
   }
 
@@ -1147,6 +1341,7 @@
   let score = 0, correct = 0, wrong = 0, streak = 0, bestStreak = 0;
   let timeLeft = 60, timerId = null;
   let roomMode = false;
+  let dailyMode = false, dailyChallenge = null;
   let roomCode = null, myId = null, myName = '', myIcon = '🦁', isHost = false;
   let roomStartedAt = null, roomDuration = 60, lastStartedAt = null;
   let lobbyPollId = null, leaderboardPollId = null, endPollId = null, gameStartedFromRoom = false;
@@ -1170,6 +1365,65 @@
   function resetGameCounters(){
     score = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0;
     hudScore.textContent = 0; hudStreak.textContent = 0;
+  }
+
+  // ---- Daily challenge (deterministic from today's date) ----
+  function hashStr(s){
+    let h = 0;
+    for(let i = 0; i < s.length; i++){ h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+    return h;
+  }
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function pickN(rng, arr, n){
+    const copy = [...arr];
+    const out = [];
+    while(out.length < n && copy.length){
+      out.push(copy.splice(Math.floor(rng() * copy.length), 1)[0]);
+    }
+    return out;
+  }
+  function getDailyChallenge(){
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const rng = mulberry32(hashStr(dateStr));
+    const chLevel = rng() < 0.5 ? 'basico' : 'avancado';
+    const pool = chLevel === 'basico' ? ['add','sub','mul','div'] : ['pow','root','pct','eq','order','logic'];
+    const chOps = pickN(rng, pool, 2 + Math.floor(rng() * 2));
+    const durations = [45, 60, 90];
+    const chDuration = durations[Math.floor(rng() * durations.length)];
+    const target = 8 + Math.floor(rng() * 8);
+    return { dateStr, level: chLevel, ops: chOps, duration: chDuration, target };
+  }
+
+  function startDailyGame(){
+    if(!dailyChallenge) return;
+    dailyMode = true;
+    roomMode = false;
+    level = dailyChallenge.level;
+    ops = dailyChallenge.ops;
+    resetGameCounters();
+    timeLeft = dailyChallenge.duration;
+    hudTime.textContent = timeLeft;
+    hudTime.classList.remove('time-low');
+    leaderboardBox.style.display = 'none';
+    showScreen('screen-game');
+    nextQuestion();
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+      timeLeft--;
+      hudTime.textContent = timeLeft;
+      if(timeLeft <= 10) hudTime.classList.add('time-low');
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        endGame();
+      }
+    }, 1000);
   }
 
   // ---- Solo flow ----
@@ -1206,7 +1460,14 @@
     document.getElementById('end-xp-note').textContent = '';
     endLeaderboard.style.display = roomMode ? 'block' : 'none';
 
-    if(!roomMode){
+    const wasDaily = dailyMode;
+    dailyMode = false;
+
+    if(wasDaily){
+      endPrimaryBtn.style.display = 'none';
+      endWaitingNote.style.display = 'block';
+      endWaitingNote.textContent = 'Volte amanhã para um novo desafio diário!';
+    } else if(!roomMode){
       endPrimaryBtn.style.display = 'block';
       endPrimaryBtn.textContent = 'Jogar de novo';
       endWaitingNote.style.display = 'none';
@@ -1221,7 +1482,7 @@
     }
 
     if(currentUser){
-      recordGameResult(roomMode ? 'sala' : 'solo').catch(() => {});
+      recordGameResult(wasDaily ? 'diario' : (roomMode ? 'sala' : 'solo')).catch(() => {});
     }
 
     showScreen('screen-end');
@@ -1661,28 +1922,218 @@
     const xpEarned = score;
     const prevLevel = currentProfile.level;
 
+    let roomRank = null;
+    if(mode === 'sala' && roomCode){
+      const scores = await dbGetScores(roomCode);
+      const idx = scores.findIndex(s => s.player_id === myId);
+      if(idx !== -1) roomRank = idx + 1;
+    }
+
     await dbInsertHistory({
       user_id: currentUser.id,
       mode,
-      room_code: roomMode ? roomCode : null,
+      room_code: mode === 'sala' ? roomCode : null,
       level,
       ops,
-      duration_seconds: roomMode ? roomDuration : SOLO_DURATION,
+      duration_seconds: mode === 'sala' ? roomDuration : (mode === 'diario' && dailyChallenge ? dailyChallenge.duration : SOLO_DURATION),
       score, correct, wrong,
       best_streak: bestStreak,
-      xp_earned: xpEarned
+      xp_earned: xpEarned,
+      room_rank: roomRank
     });
 
     await dbUpdateXp(currentUser.id, currentProfile.xp + xpEarned);
+    if(score > currentProfile.best_score){
+      await dbUpdateBestScore(currentUser.id, score);
+    }
+
+    if(mode === 'diario' && dailyChallenge){
+      const completed = correct >= dailyChallenge.target;
+      await dbUpsertDailyProgress({
+        user_id: currentUser.id,
+        challenge_date: dailyChallenge.dateStr,
+        completed,
+        score,
+        xp_earned: xpEarned,
+        completed_at: completed ? new Date().toISOString() : null
+      });
+    }
+
     await refreshProfile();
     renderAccountBar();
+
+    const unlocked = await checkAndUnlockAchievements();
 
     const note = document.getElementById('end-xp-note');
     if(note){
       const leveledUp = currentProfile && currentProfile.level > prevLevel;
-      note.textContent = `+${xpEarned} XP` + (leveledUp ? ` · subiu para o nível ${currentProfile.level}! 🎉` : '');
+      let text = `+${xpEarned} XP` + (leveledUp ? ` · subiu para o nível ${currentProfile.level}! 🎉` : '');
+      if(unlocked.length){
+        const label = unlocked.length > 1 ? 'Conquistas desbloqueadas' : 'Conquista desbloqueada';
+        text += ` · ${label}: ` + unlocked.map(a => `${a.icon} ${a.name}`).join(', ');
+      }
+      note.textContent = text;
     }
   }
+
+  function computeConsecutiveDays(rows){
+    if(rows.length === 0) return 0;
+    const dates = [...new Set(rows.map(r => r.challenge_date))].sort().reverse();
+    let streak = 1;
+    for(let i = 0; i < dates.length - 1; i++){
+      const diffDays = Math.round((new Date(dates[i]) - new Date(dates[i+1])) / 86400000);
+      if(diffDays === 1) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  async function checkAndUnlockAchievements(){
+    if(!currentUser) return [];
+    const achievements = await dbGetAchievements();
+    const unlockedRows = await dbGetUserAchievements(currentUser.id);
+    const unlockedCodes = new Set(unlockedRows.map(u => u.achievement_code));
+    const stats = await dbGetUserStats(currentUser.id);
+    const dailyRows = await dbGetDailyStreak(currentUser.id);
+
+    const values = {
+      games_played: stats.length,
+      total_correct: stats.reduce((s, r) => s + (r.correct || 0), 0),
+      best_streak: stats.reduce((m, r) => Math.max(m, r.best_streak || 0), 0),
+      level_reached: currentProfile.level,
+      advanced_games: stats.filter(r => r.level === 'avancado').length,
+      room_wins: stats.filter(r => r.room_rank === 1).length,
+      daily_streak: computeConsecutiveDays(dailyRows)
+    };
+
+    const newly = [];
+    for(const a of achievements){
+      if(unlockedCodes.has(a.code)) continue;
+      const val = values[a.criteria_type];
+      if(val !== undefined && val >= a.criteria_value){
+        const ok = await dbUnlockAchievement(currentUser.id, a.code);
+        if(ok) newly.push(a);
+      }
+    }
+    return newly;
+  }
+
+  // ---- Ranking screen ----
+  let rankingTab = 'xp';
+  async function renderRankingScreen(tab){
+    const list = document.getElementById('ranking-list');
+    const note = document.getElementById('my-rank-note');
+    const rows = tab === 'score' ? await dbGetTopByBestScore(20) : await dbGetTopByXp(20);
+    list.innerHTML = rows.map((p, i) => {
+      const isMe = currentUser && p.id === currentUser.id;
+      const val = tab === 'score' ? p.best_score : p.xp;
+      return `<div class="ranking-row ${isMe ? 'me' : ''}"><span class="rk-pos">${i+1}º</span><span class="rk-name">${p.icon} ${escapeHtml(p.username)} <span class="rk-sub">Nível ${p.level}</span></span><span class="rk-val">${val}</span></div>`;
+    }).join('') || '<div class="ranking-row">Ninguém no ranking ainda.</div>';
+
+    if(currentUser && currentProfile){
+      const compareVal = tab === 'score' ? currentProfile.best_score : currentProfile.xp;
+      const above = await dbCountAbove(tab === 'score' ? 'best_score' : 'xp', compareVal);
+      note.textContent = above !== null ? `Sua posição: #${above + 1}` : '';
+    } else {
+      note.textContent = 'Entre na sua conta para ver sua posição.';
+    }
+  }
+  const rankingTabButtons = [...document.querySelectorAll('#ranking-tab-row .choice')];
+  rankingTabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      rankingTabButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      rankingTab = btn.dataset.tab;
+      renderRankingScreen(rankingTab);
+    });
+  });
+  document.getElementById('goto-ranking-btn').addEventListener('click', () => {
+    showScreen('screen-ranking');
+    renderRankingScreen(rankingTab);
+  });
+
+  // ---- Achievements screen ----
+  async function renderAchievementsScreen(){
+    const subtitle = document.getElementById('achievements-subtitle');
+    const list = document.getElementById('achv-list');
+    const achievements = await dbGetAchievements();
+
+    if(!currentUser){
+      subtitle.style.display = 'block';
+      list.innerHTML = achievements.map(a => `
+        <div class="achv-row locked">
+          <div class="achv-icon">${a.icon}</div>
+          <div><div class="achv-name">${escapeHtml(a.name)}</div><div class="achv-desc">${escapeHtml(a.description)}</div></div>
+        </div>`).join('');
+      return;
+    }
+    subtitle.style.display = 'none';
+    const unlockedRows = await dbGetUserAchievements(currentUser.id);
+    const unlockedMap = new Map(unlockedRows.map(u => [u.achievement_code, u.unlocked_at]));
+    list.innerHTML = achievements.map(a => {
+      const unlocked = unlockedMap.has(a.code);
+      const dateStr = unlocked ? new Date(unlockedMap.get(a.code)).toLocaleDateString('pt-BR') : '';
+      return `
+        <div class="achv-row ${unlocked ? 'unlocked' : 'locked'}">
+          <div class="achv-icon">${a.icon}</div>
+          <div><div class="achv-name">${escapeHtml(a.name)}</div><div class="achv-desc">${escapeHtml(a.description)}${unlocked ? ' · desbloqueada em ' + dateStr : ''}</div></div>
+        </div>`;
+    }).join('');
+  }
+  document.getElementById('goto-achievements-btn').addEventListener('click', () => {
+    showScreen('screen-achievements');
+    renderAchievementsScreen();
+  });
+
+  // ---- Daily challenge screen ----
+  async function renderDailyScreen(){
+    dailyChallenge = getDailyChallenge();
+    const dailySubtitle = document.getElementById('daily-subtitle');
+    const dailyStatus = document.getElementById('daily-status');
+    const dailyPlayBtn = document.getElementById('daily-play-btn');
+    const dailyLoginBtn = document.getElementById('daily-login-btn');
+
+    document.getElementById('daily-level').textContent = dailyChallenge.level === 'basico' ? 'Básico' : 'Avançado';
+    document.getElementById('daily-duration').textContent = `${dailyChallenge.duration}s`;
+    document.getElementById('daily-target').textContent = `${dailyChallenge.target} acertos`;
+
+    if(!currentUser){
+      dailySubtitle.style.display = 'block';
+      dailySubtitle.textContent = 'Entre na sua conta para jogar o desafio diário.';
+      dailyStatus.style.display = 'none';
+      dailyPlayBtn.style.display = 'none';
+      dailyLoginBtn.style.display = 'block';
+    } else {
+      dailySubtitle.style.display = 'none';
+      dailyLoginBtn.style.display = 'none';
+      const progress = await dbGetDailyProgress(currentUser.id, dailyChallenge.dateStr);
+      if(progress && progress.completed){
+        dailyStatus.style.display = 'block';
+        dailyStatus.textContent = `Concluído hoje! ${progress.score} pontos · +${progress.xp_earned} XP`;
+        dailyPlayBtn.style.display = 'none';
+      } else {
+        dailyStatus.style.display = 'none';
+        dailyPlayBtn.style.display = 'block';
+        dailyPlayBtn.textContent = progress ? 'Tentar de novo' : 'Jogar desafio de hoje';
+      }
+    }
+
+    const rows = await dbGetDailyLeaderboard(dailyChallenge.dateStr, 20);
+    const profiles = await dbGetProfilesByIds(rows.map(r => r.user_id));
+    const profileMap = new Map(profiles.map(p => [p.id, p]));
+    const list = document.getElementById('daily-ranking-list');
+    list.innerHTML = rows.map((r, i) => {
+      const p = profileMap.get(r.user_id);
+      const isMe = currentUser && r.user_id === currentUser.id;
+      return `<div class="ranking-row ${isMe ? 'me' : ''}"><span class="rk-pos">${i+1}º</span><span class="rk-name">${p ? p.icon : '🙂'} ${escapeHtml(p ? p.username : '???')}</span><span class="rk-val">${r.score}</span></div>`;
+    }).join('') || '<div class="ranking-row">Ninguém jogou hoje ainda.</div>';
+  }
+  document.getElementById('goto-daily-btn').addEventListener('click', () => {
+    showScreen('screen-daily');
+    renderDailyScreen();
+  });
+  document.getElementById('daily-play-btn').addEventListener('click', startDailyGame);
+  document.getElementById('daily-login-btn').addEventListener('click', () => showScreen('screen-auth'));
 
   startBtn.disabled = soloPicker.getOps().length === 0;
   createRoomBtn.disabled = roomPicker.getOps().length === 0;
