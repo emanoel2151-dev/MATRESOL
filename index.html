@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MATRESOL</title>
+<title>Quadro de Cálculo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -639,6 +639,33 @@
     font-size:0.74rem;
   }
 
+  .plan-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .plan-card{
+    flex:1;
+    background:rgba(217,164,65,0.06);
+    border:1.5px solid rgba(217,164,65,0.4);
+    border-radius:6px;
+    padding:16px 10px;
+    text-align:center;
+    cursor:pointer;
+    font-family:inherit;
+    color:var(--chalk);
+  }
+  .plan-card:hover{ border-color:var(--gold); }
+  .plan-name{ font-size:0.8rem; color:var(--chalk-dim); margin-bottom:6px; }
+  .plan-price{ font-weight:700; font-size:1.15rem; color:var(--gold); }
+
+  .choice.premium-icon.locked{
+    opacity:0.35;
+    cursor:not-allowed;
+    position:relative;
+  }
+  .premium-badge{ color:var(--gold); }
+
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
   }
@@ -672,6 +699,8 @@
     <div class="account-bar" id="account-bar-user" style="display:none">
       <span id="account-info-text"></span>
       <span>
+        <button class="mini-link" id="account-premium-btn">✨ Premium</button>
+        <button class="mini-link" id="account-admin-btn" style="display:none">🔧 Admin</button>
         <button class="mini-link" id="account-profile-btn">Perfil</button>
         <button class="mini-link" id="account-logout-btn">Sair</button>
       </span>
@@ -943,10 +972,76 @@
       <div class="xp-bar-label" id="xp-bar-label">0 XP</div>
     </div>
 
+    <div class="group-label">Ícone</div>
+    <div class="choice-row" id="profile-icon-row">
+      <button class="choice" data-icon="🦁">🦁</button>
+      <button class="choice" data-icon="🐯">🐯</button>
+      <button class="choice" data-icon="🐸">🐸</button>
+      <button class="choice" data-icon="🐵">🐵</button>
+      <button class="choice" data-icon="🐨">🐨</button>
+      <button class="choice" data-icon="🦊">🦊</button>
+      <button class="choice" data-icon="🐰">🐰</button>
+      <button class="choice" data-icon="🐼">🐼</button>
+    </div>
+    <div class="group-label">Ícones exclusivos ✨ Premium</div>
+    <div class="choice-row" id="profile-icon-row-premium">
+      <button class="choice premium-icon" data-icon="🐲">🐲</button>
+      <button class="choice premium-icon" data-icon="🦖">🦖</button>
+      <button class="choice premium-icon" data-icon="🦄">🦄</button>
+      <button class="choice premium-icon" data-icon="🐉">🐉</button>
+      <button class="choice premium-icon" data-icon="🦅">🦅</button>
+      <button class="choice premium-icon" data-icon="🐺">🐺</button>
+    </div>
+
     <div class="group-label">Histórico recente</div>
     <div class="history-list" id="history-list"></div>
 
     <button class="link-btn" id="profile-logout-btn">Sair da conta</button>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- PREMIUM -->
+  <section class="section" id="screen-premium">
+    <h1>✨ Premium</h1>
+    <p class="subtitle" id="premium-status-text">Entre na sua conta para assinar o Premium.</p>
+
+    <div class="daily-card" id="premium-benefits">
+      <div class="daily-card-row"><span>Ícones exclusivos</span><strong>+6</strong></div>
+      <div class="daily-card-row"><span>Histórico</span><strong>Ilimitado</strong></div>
+      <div class="daily-card-row"><span>Turmas (professor)</span><strong>Ilimitadas</strong></div>
+      <div class="daily-card-row"><span>Relatório</span><strong>Exportar CSV</strong></div>
+    </div>
+
+    <div class="error-text" id="premium-error"></div>
+
+    <div class="plan-row">
+      <button class="plan-card" id="plan-mensal-btn">
+        <div class="plan-name">Mensal</div>
+        <div class="plan-price">R$ 9,90</div>
+      </button>
+      <button class="plan-card" id="plan-anual-btn">
+        <div class="plan-name">Anual</div>
+        <div class="plan-price">R$ 79,90</div>
+      </button>
+    </div>
+
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="section" id="screen-admin">
+    <h1>🔧 Painel admin</h1>
+    <p class="subtitle">Conceda Premium a uma conta de teste sem pagamento.</p>
+    <div class="field">
+      <label for="admin-username-input">Nome de usuário</label>
+      <input type="text" class="text-input" id="admin-username-input" placeholder="nome de usuário exato">
+    </div>
+    <div class="field">
+      <label for="admin-days-input">Dias de Premium</label>
+      <input type="number" class="text-input" id="admin-days-input" value="30" min="1">
+    </div>
+    <div class="error-text" id="admin-error"></div>
+    <button class="start-btn" id="admin-grant-btn">Conceder Premium</button>
     <button class="back-link" data-back="screen-start">Voltar</button>
   </section>
 
@@ -1036,6 +1131,7 @@
     <div class="report-summary" id="report-summary"></div>
     <div class="group-label">Alunos</div>
     <div class="report-student-list" id="report-student-list"></div>
+    <button class="link-btn" id="export-csv-btn" style="display:none">⬇️ Exportar CSV</button>
     <button class="back-link" data-back="screen-teacher-panel">Voltar</button>
   </section>
 
@@ -1219,6 +1315,20 @@
     if(userIds.length === 0) return [];
     const { data, error } = await sb.from('game_history').select('user_id, score, correct, wrong, played_at').in('user_id', userIds);
     return error ? [] : data;
+  }
+
+  // ---- Premium / admin ----
+  function isPremiumProfile(profile){
+    return !!(profile && profile.premium_until && new Date(profile.premium_until) > new Date());
+  }
+  async function dbAdminGrantPremium(username, days){
+    const { error } = await sb.rpc('admin_grant_premium', { target_username: username, days });
+    return error ? (error.message || 'Erro desconhecido') : null;
+  }
+  async function dbCreatePaymentPreference(plan){
+    const { data, error } = await sb.functions.invoke('criar-pagamento', { body: { plan } });
+    if(error) throw error;
+    return data;
   }
 
   function escapeHtml(s){
@@ -1927,7 +2037,9 @@
     if(currentUser && currentProfile){
       barUser.style.display = 'flex';
       barGuest.style.display = 'none';
-      accountInfoText.textContent = `${currentProfile.icon} ${currentProfile.username} · Nível ${currentProfile.level} · ${currentProfile.xp} XP`;
+      const badge = isPremiumProfile(currentProfile) ? ' <span class="premium-badge">✨</span>' : '';
+      accountInfoText.innerHTML = `${currentProfile.icon} ${escapeHtml(currentProfile.username)}${badge} · Nível ${currentProfile.level} · ${currentProfile.xp} XP`;
+      document.getElementById('account-admin-btn').style.display = currentProfile.is_admin ? 'inline' : 'none';
     } else {
       barUser.style.display = 'none';
       barGuest.style.display = 'flex';
@@ -1961,6 +2073,15 @@
   document.getElementById('account-profile-btn').addEventListener('click', () => {
     showScreen('screen-profile');
     renderProfileScreen();
+  });
+  document.getElementById('account-premium-btn').addEventListener('click', () => {
+    showScreen('screen-premium');
+    renderPremiumScreen();
+  });
+  document.getElementById('account-admin-btn').addEventListener('click', () => {
+    document.getElementById('admin-username-input').value = '';
+    document.getElementById('admin-error').textContent = '';
+    showScreen('screen-admin');
   });
 
   // ---- Auth screen ----
@@ -2052,27 +2173,54 @@
   const xpBarFill = document.getElementById('xp-bar-fill');
   const xpBarLabel = document.getElementById('xp-bar-label');
   const historyList = document.getElementById('history-list');
+  const profileIconButtons = [...document.querySelectorAll('#profile-icon-row .choice, #profile-icon-row-premium .choice')];
+
+  async function chooseProfileIcon(icon, isPremiumIcon){
+    if(isPremiumIcon && !isPremiumProfile(currentProfile)) return;
+    const { error } = await sb.from('profiles').update({ icon }).eq('id', currentUser.id);
+    if(!error){
+      await refreshProfile();
+      renderAccountBar();
+      renderProfileScreen();
+    }
+  }
+  profileIconButtons.forEach(btn => {
+    const isPremiumIcon = btn.classList.contains('premium-icon');
+    btn.addEventListener('click', () => chooseProfileIcon(btn.dataset.icon, isPremiumIcon));
+  });
 
   function renderProfileScreen(){
     if(!currentProfile) return;
     profileIconEl.textContent = currentProfile.icon;
-    profileUsernameEl.textContent = currentProfile.username;
+    profileUsernameEl.textContent = currentProfile.username + (isPremiumProfile(currentProfile) ? ' ✨' : '');
     profileLevelEl.textContent = `Nível ${currentProfile.level}`;
     const { floor, next } = levelThresholds(currentProfile.level);
     const pct = Math.max(0, Math.min(100, Math.round(((currentProfile.xp - floor) / (next - floor)) * 100)));
     xpBarFill.style.width = pct + '%';
     xpBarLabel.textContent = `${currentProfile.xp} XP · faltam ${Math.max(0, next - currentProfile.xp)} para o nível ${currentProfile.level + 1}`;
+
+    const premium = isPremiumProfile(currentProfile);
+    profileIconButtons.forEach(btn => {
+      btn.classList.remove('selected');
+      if(btn.dataset.icon === currentProfile.icon) btn.classList.add('selected');
+      if(btn.classList.contains('premium-icon')) btn.classList.toggle('locked', !premium);
+    });
+
     loadHistory();
   }
 
   async function loadHistory(){
-    const rows = await dbGetHistory(currentUser.id, 15);
+    const limit = isPremiumProfile(currentProfile) ? 500 : 15;
+    const rows = await dbGetHistory(currentUser.id, limit);
     historyList.innerHTML = rows.map(h => {
       const date = new Date(h.played_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      const modeLabel = h.mode === 'sala' ? 'Sala' : 'Sozinho';
+      const modeLabel = h.mode === 'sala' ? 'Sala' : (h.mode === 'diario' ? 'Desafio diário' : 'Sozinho');
       const levelLabel = h.level === 'basico' ? 'Básico' : 'Avançado';
       return `<div class="history-row"><span>${modeLabel} · ${levelLabel} <span class="hr-date">${date}</span></span><span>${h.score} pts</span></div>`;
     }).join('') || '<div class="history-row">Nenhuma partida registrada ainda.</div>';
+    if(!isPremiumProfile(currentProfile) && rows.length >= 15){
+      historyList.innerHTML += '<div class="history-row" style="opacity:.6">Assine o Premium para ver o histórico completo ✨</div>';
+    }
   }
 
   document.getElementById('profile-logout-btn').addEventListener('click', async () => {
@@ -2357,6 +2505,13 @@
     btn.disabled = true;
     errEl.textContent = '';
     try{
+      if(!isPremiumProfile(currentProfile)){
+        const existing = await dbGetClassesByTeacher(currentUser.id);
+        if(existing.length >= 1){
+          errEl.textContent = 'O plano grátis permite 1 turma. Assine o Premium para turmas ilimitadas ✨';
+          return;
+        }
+      }
       const code = genClassCode();
       const ok = await dbCreateClass(currentUser.id, name, code);
       if(!ok){ errEl.textContent = 'Não foi possível criar a turma. Tente de novo.'; return; }
@@ -2418,7 +2573,12 @@
     await renderClassReport();
   }
 
+  let lastReportData = null;
+
   async function renderClassReport(){
+    const exportBtn = document.getElementById('export-csv-btn');
+    exportBtn.style.display = isPremiumProfile(currentProfile) ? 'block' : 'none';
+
     const classes = await dbGetClassesByTeacher(currentUser.id);
     const cls = classes.find(c => c.id === selectedClassId);
     if(!cls) return;
@@ -2441,6 +2601,8 @@
       s.bestScore = Math.max(s.bestScore, h.score || 0);
       if(!s.lastPlayed || new Date(h.played_at) > new Date(s.lastPlayed)) s.lastPlayed = h.played_at;
     }
+
+    lastReportData = { className: cls.name, studentIds, profiles, byUser };
 
     const totalCorrect = history.reduce((sum, h) => sum + (h.correct || 0), 0);
     const totalWrong = history.reduce((sum, h) => sum + (h.wrong || 0), 0);
@@ -2474,6 +2636,87 @@
         </div>`;
     }).join('');
   }
+
+  document.getElementById('export-csv-btn').addEventListener('click', () => {
+    if(!lastReportData || !isPremiumProfile(currentProfile)) return;
+    const { className, studentIds, profiles, byUser } = lastReportData;
+    const header = 'Nome,Nivel,Partidas,Acertos,Erros,Melhor Pontuacao,Ultima Vez\n';
+    const rows = studentIds.map(id => {
+      const p = profiles.find(pr => pr.id === id);
+      const s = byUser.get(id);
+      const lastDate = s.lastPlayed ? new Date(s.lastPlayed).toLocaleDateString('pt-BR') : '';
+      const name = (p ? p.username : '???').replace(/,/g, ' ');
+      return `${name},${p ? p.level : 1},${s.games},${s.correct},${s.wrong},${s.bestScore},${lastDate}`;
+    });
+    const csv = header + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio-${className.replace(/[^a-z0-9]/gi, '-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ---- Premium screen ----
+  async function renderPremiumScreen(){
+    const statusText = document.getElementById('premium-status-text');
+    const errEl = document.getElementById('premium-error');
+    errEl.textContent = '';
+    if(!currentUser){
+      statusText.textContent = 'Entre na sua conta para assinar o Premium.';
+      return;
+    }
+    if(isPremiumProfile(currentProfile)){
+      const until = new Date(currentProfile.premium_until).toLocaleDateString('pt-BR');
+      statusText.textContent = `Você já é Premium ✨ (ativo até ${until}). Assinar de novo estende o prazo.`;
+    } else {
+      statusText.textContent = 'Escolha um plano para desbloquear os recursos exclusivos.';
+    }
+  }
+
+  async function startCheckout(plan){
+    const errEl = document.getElementById('premium-error');
+    if(!currentUser){ showScreen('screen-auth'); return; }
+    errEl.textContent = 'Abrindo o checkout…';
+    try{
+      const result = await dbCreatePaymentPreference(plan);
+      if(result && result.init_point){
+        window.location.href = result.init_point;
+      } else {
+        errEl.textContent = 'Não foi possível iniciar o pagamento agora. Tente novamente mais tarde.';
+      }
+    } catch(err){
+      errEl.textContent = 'Pagamento indisponível no momento. ' + (err && err.message ? err.message : '');
+    }
+  }
+  document.getElementById('plan-mensal-btn').addEventListener('click', () => startCheckout('mensal'));
+  document.getElementById('plan-anual-btn').addEventListener('click', () => startCheckout('anual'));
+
+  // ---- Admin screen ----
+  document.getElementById('admin-grant-btn').addEventListener('click', async () => {
+    const usernameInput = document.getElementById('admin-username-input');
+    const daysInput = document.getElementById('admin-days-input');
+    const errEl = document.getElementById('admin-error');
+    const btn = document.getElementById('admin-grant-btn');
+    const username = usernameInput.value.trim();
+    const days = parseInt(daysInput.value, 10) || 30;
+    if(!username){ errEl.textContent = 'Digite o nome de usuário.'; return; }
+
+    btn.disabled = true;
+    errEl.textContent = '';
+    try{
+      const err = await dbAdminGrantPremium(username, days);
+      if(err){ errEl.textContent = 'Erro: ' + err; return; }
+      errEl.textContent = '';
+      usernameInput.value = '';
+      alert(`Premium concedido a ${username} por ${days} dias.`);
+    } catch(err){
+      errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   startBtn.disabled = soloPicker.getOps().length === 0;
   createRoomBtn.disabled = roomPicker.getOps().length === 0;
