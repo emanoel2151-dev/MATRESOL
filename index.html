@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MATRESOL</title>
+<title>Quadro de Cálculo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -1033,8 +1033,8 @@
     <h1>🔧 Painel admin</h1>
     <p class="subtitle">Conceda Premium a uma conta de teste sem pagamento.</p>
     <div class="field">
-      <label for="admin-username-input">Nome de usuário</label>
-      <input type="text" class="text-input" id="admin-username-input" placeholder="nome de usuário exato">
+      <label for="admin-username-input">Nome de usuário ou e-mail</label>
+      <input type="text" class="text-input" id="admin-username-input" placeholder="nome de usuário ou e-mail exato">
     </div>
     <div class="field">
       <label for="admin-days-input">Dias de Premium</label>
@@ -1756,6 +1756,24 @@
     if(roomMode) finishRoomGame();
   }
 
+  const TIME_BONUS = 2;
+  const TIME_PENALTY = 3;
+
+  function adjustTime(delta){
+    if(roomMode){
+      roomStartedAt += delta * 1000;
+      updateRoomTimer();
+    } else {
+      timeLeft += delta;
+      hudTime.textContent = Math.max(0, timeLeft);
+      hudTime.classList.toggle('time-low', timeLeft <= 10);
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        endGame();
+      }
+    }
+  }
+
   function selectAnswer(val, btnEl){
     if(currentAnswer === null || timeLeft <= 0) return;
     optionButtons.forEach(b => b.disabled = true);
@@ -1772,18 +1790,22 @@
       bestStreak = Math.max(bestStreak, streak);
       const bonus = Math.min(streak, 5);
       score += 10 + bonus;
-      feedback.textContent = 'Certo!';
+      feedback.textContent = `Certo! +${TIME_BONUS}s`;
       feedback.className = 'feedback correct';
+      adjustTime(TIME_BONUS);
     } else {
       wrong++;
       streak = 0;
-      feedback.textContent = `Errado — resposta: ${formatNum(currentAnswer)}`;
+      feedback.textContent = `Errado — resposta: ${formatNum(currentAnswer)} (−${TIME_PENALTY}s)`;
       feedback.className = 'feedback wrong';
+      adjustTime(-TIME_PENALTY);
     }
     hudScore.textContent = score;
     hudStreak.textContent = streak;
     if(roomMode) pushMyScore();
-    setTimeout(nextQuestion, isCorrect ? 450 : 950);
+    if(timeLeft > 0){
+      setTimeout(nextQuestion, isCorrect ? 450 : 950);
+    }
   }
 
   optionButtons.forEach(btn => {
