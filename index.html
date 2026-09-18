@@ -665,6 +665,33 @@
     position:relative;
   }
   .premium-badge{ color:var(--gold); }
+  .school-note{
+    font-size:0.8rem;
+    color:var(--chalk-dim);
+    margin-bottom:6px;
+  }
+
+  .track-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin:12px 0 18px;
+  }
+  .track-step-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:11px 12px;
+    border-radius:5px;
+    background:rgba(241,238,226,0.04);
+    border:1px solid rgba(241,238,226,0.1);
+    font-size:0.85rem;
+  }
+  .track-step-row.completed{ border-color:var(--green); opacity:0.7; }
+  .track-step-row.current{ border-color:var(--gold); background:rgba(217,164,65,0.08); }
+  .track-step-row.locked{ opacity:0.4; }
+  .track-step-row .ts-label{ display:flex; flex-direction:column; }
+  .track-step-row .ts-sub{ font-size:0.72rem; color:var(--chalk-dim); }
 
   @media (prefers-reduced-motion: reduce){
     *{ transition:none !important; }
@@ -714,6 +741,10 @@
       <button class="nav-btn" id="goto-achievements-btn">🎖️ Conquistas</button>
       <button class="nav-btn" id="goto-daily-btn">📅 Desafio diário</button>
       <button class="nav-btn" id="goto-class-btn">🏫 Turma</button>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="goto-track-btn">🧭 Minha trilha</button>
+      <button class="nav-btn" id="goto-ai-btn">🤖 Desafio com IA</button>
     </div>
 
     <div class="group-label">Nível</div>
@@ -1090,10 +1121,49 @@
   <!-- TEACHER PANEL -->
   <section class="section" id="screen-teacher-panel">
     <h1>Painel do professor</h1>
+
+    <div class="school-note" id="teacher-school-note"></div>
+    <button class="link-btn" id="goto-school-btn">🏫 Minha escola</button>
+
     <button class="start-btn" id="create-class-btn">+ Criar turma</button>
     <div class="group-label">Suas turmas</div>
     <div class="class-list" id="teacher-class-list"></div>
     <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
+  <!-- SCHOOL -->
+  <section class="section" id="screen-school">
+    <h1>Escola</h1>
+    <div id="school-no-school">
+      <p class="subtitle">Você ainda não está em nenhuma escola.</p>
+      <div class="field">
+        <label for="create-school-name-input">Nome da escola</label>
+        <input type="text" class="text-input" id="create-school-name-input" maxlength="60" placeholder="ex: Escola Municipal Dom Bosco">
+      </div>
+      <div class="error-text" id="create-school-error"></div>
+      <button class="start-btn" id="create-school-btn">Criar escola (vira admin)</button>
+
+      <div class="group-label">Ou entrar numa escola existente</div>
+      <div class="field">
+        <label for="join-school-code-input">Código da escola</label>
+        <input type="text" class="text-input" id="join-school-code-input" maxlength="6" style="text-transform:uppercase; letter-spacing:0.15em;">
+      </div>
+      <div class="error-text" id="join-school-error"></div>
+      <button class="start-btn" id="join-school-btn">Entrar na escola</button>
+    </div>
+
+    <div id="school-has-school" style="display:none">
+      <div class="room-code-display">
+        <div class="code" id="school-name-display">—</div>
+        <div class="hint" id="school-code-display"></div>
+      </div>
+      <div class="group-label" id="school-teachers-label" style="display:none">Professores da escola</div>
+      <div class="class-list" id="school-teachers-list"></div>
+      <div class="group-label" id="school-classes-label" style="display:none">Todas as turmas</div>
+      <div class="class-list" id="school-classes-list"></div>
+    </div>
+
+    <button class="back-link" data-back="screen-teacher-panel">Voltar</button>
   </section>
 
   <!-- CREATE CLASS -->
@@ -1124,6 +1194,19 @@
     <button class="back-link" data-back="screen-start">Voltar</button>
   </section>
 
+  <!-- TRACK -->
+  <section class="section" id="screen-track">
+    <h1 id="track-title">Minha trilha</h1>
+    <p class="subtitle" id="track-subtitle">Entre na sua conta para ver sua trilha personalizada.</p>
+    <div class="track-list" id="track-list"></div>
+    <div class="group-label" id="track-teacher-label" style="display:none">Ajustar (professor)</div>
+    <div class="choice-row" id="track-teacher-controls" style="display:none">
+      <button class="choice" id="track-add-easy-btn">+ Etapa de reforço (básico)</button>
+      <button class="choice" id="track-add-hard-btn">+ Etapa avançada</button>
+    </div>
+    <button class="back-link" data-back="screen-start">Voltar</button>
+  </section>
+
   <!-- CLASS REPORT (teacher) -->
   <section class="section" id="screen-class-report">
     <h1 id="report-class-name">Turma</h1>
@@ -1133,6 +1216,27 @@
     <div class="report-student-list" id="report-student-list"></div>
     <button class="link-btn" id="export-csv-btn" style="display:none">⬇️ Exportar CSV</button>
     <button class="back-link" data-back="screen-teacher-panel">Voltar</button>
+  </section>
+
+  <!-- AI CHALLENGE -->
+  <section class="section" id="screen-ai">
+    <h1>🤖 Desafio com IA</h1>
+    <p class="subtitle" id="ai-subtitle">Entre na sua conta para gerar desafios personalizados.</p>
+
+    <div id="ai-form" style="display:none">
+      <div class="field">
+        <label for="ai-theme-input">Tema (opcional)</label>
+        <input type="text" class="text-input" id="ai-theme-input" maxlength="40" placeholder="ex: futebol, receita de bolo...">
+      </div>
+      <div class="choice-row" id="ai-focus-row">
+        <button class="choice selected" data-focus="fraco">Focar meus pontos fracos</button>
+        <button class="choice" data-focus="livre">Só o tema, sem foco</button>
+      </div>
+      <div class="error-text" id="ai-error"></div>
+      <button class="start-btn" id="ai-generate-btn">Gerar desafio</button>
+    </div>
+
+    <button class="back-link" data-back="screen-start">Voltar</button>
   </section>
 
 </div>
@@ -1331,6 +1435,57 @@
     return data;
   }
 
+  // ---- Schools ----
+  async function dbCreateSchool(name){
+    const { data, error } = await sb.rpc('create_school', { school_name: name });
+    return { code: data, error: error ? error.message : null };
+  }
+  async function dbJoinSchoolByCode(code){
+    const { error } = await sb.rpc('join_school', { input_code: code });
+    return error ? (error.message || 'Erro desconhecido') : null;
+  }
+  async function dbGetSchoolById(id){
+    const { data, error } = await sb.from('schools').select('*').eq('id', id).maybeSingle();
+    return error ? null : data;
+  }
+  async function dbGetSchoolTeachers(schoolId){
+    const { data, error } = await sb.from('profiles').select('*').eq('school_id', schoolId).eq('role', 'professor');
+    return error ? [] : data;
+  }
+  async function dbGetSchoolClasses(schoolId){
+    const { data, error } = await sb.from('classes').select('*').eq('school_id', schoolId);
+    return error ? [] : data;
+  }
+
+  // ---- Learning tracks ----
+  async function dbGetTrack(studentId){
+    const { data, error } = await sb.from('learning_tracks').select('*').eq('student_id', studentId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    return error ? null : data;
+  }
+  async function dbCreateTrack(studentId, createdBy){
+    const { data, error } = await sb.from('learning_tracks').insert({ student_id: studentId, created_by: createdBy }).select().single();
+    return error ? null : data;
+  }
+  async function dbGetTrackSteps(trackId){
+    const { data, error } = await sb.from('track_steps').select('*').eq('track_id', trackId).order('step_order', { ascending: true });
+    return error ? [] : data;
+  }
+  async function dbInsertTrackStep(trackId, order, level, ops, target){
+    const { error } = await sb.from('track_steps').insert({ track_id: trackId, step_order: order, level, ops, target_correct: target });
+    return !error;
+  }
+  async function dbUpdateStepStatus(stepId, status){
+    const { error } = await sb.from('track_steps').update({ status, completed_at: status === 'concluida' ? new Date().toISOString() : null }).eq('id', stepId);
+    return !error;
+  }
+
+  // ---- AI challenge (Edge Function) ----
+  async function dbGenerateAIChallenge(theme, focusWeak){
+    const { data, error } = await sb.functions.invoke('gerar-desafio-ia', { body: { theme, focus_weak: focusWeak } });
+    if(error) throw error;
+    return data;
+  }
+
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -1486,8 +1641,14 @@
   const optionButtons = [...document.querySelectorAll('.option-btn')];
 
   function nextQuestion(){
-    const op = ops[randInt(0, ops.length - 1)];
-    const q = level === 'basico' ? genBasic(op) : genAdvanced(op);
+    let q;
+    if(aiMode && aiQuestions.length){
+      q = aiQuestions[aiQuestionIndex % aiQuestions.length];
+      aiQuestionIndex++;
+    } else {
+      const op = ops[randInt(0, ops.length - 1)];
+      q = level === 'basico' ? genBasic(op) : genAdvanced(op);
+    }
     currentAnswer = q.answer;
     equationText.textContent = q.text;
     equationText.classList.toggle('long-text', q.text.length > 20);
@@ -1609,6 +1770,8 @@
   let timeLeft = 60, timerId = null;
   let roomMode = false;
   let dailyMode = false, dailyChallenge = null;
+  let trackStepMode = false, currentTrackStepId = null, trackStepTarget = 0;
+  let aiMode = false, aiQuestions = [], aiQuestionIndex = 0;
   let roomCode = null, myId = null, myName = '', myIcon = '🦁', isHost = false;
   let roomStartedAt = null, roomDuration = 60, lastStartedAt = null;
   let lobbyPollId = null, leaderboardPollId = null, endPollId = null, gameStartedFromRoom = false;
@@ -1693,6 +1856,57 @@
     }, 1000);
   }
 
+  function startTrackStep(step){
+    trackStepMode = true;
+    currentTrackStepId = step.id;
+    trackStepTarget = step.target_correct;
+    roomMode = false; dailyMode = false; aiMode = false;
+    level = step.level;
+    ops = step.ops;
+    resetGameCounters();
+    timeLeft = 60;
+    hudTime.textContent = timeLeft;
+    hudTime.classList.remove('time-low');
+    leaderboardBox.style.display = 'none';
+    showScreen('screen-game');
+    nextQuestion();
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+      timeLeft--;
+      hudTime.textContent = timeLeft;
+      if(timeLeft <= 10) hudTime.classList.add('time-low');
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function startAIGame(){
+    aiMode = true;
+    roomMode = false; dailyMode = false; trackStepMode = false;
+    aiQuestionIndex = 0;
+    level = 'basico';
+    ops = ['ia'];
+    resetGameCounters();
+    timeLeft = 60;
+    hudTime.textContent = timeLeft;
+    hudTime.classList.remove('time-low');
+    leaderboardBox.style.display = 'none';
+    showScreen('screen-game');
+    nextQuestion();
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+      timeLeft--;
+      hudTime.textContent = timeLeft;
+      if(timeLeft <= 10) hudTime.classList.add('time-low');
+      if(timeLeft <= 0){
+        clearInterval(timerId);
+        endGame();
+      }
+    }, 1000);
+  }
+
   // ---- Solo flow ----
   function startSoloGame(){
     roomMode = false;
@@ -1729,8 +1943,32 @@
 
     const wasDaily = dailyMode;
     dailyMode = false;
+    const wasTrackStep = trackStepMode;
+    trackStepMode = false;
+    const wasAI = aiMode;
+    aiMode = false;
 
-    if(wasDaily){
+    let lastEndMode = 'solo';
+    if(wasTrackStep) lastEndMode = 'trilha';
+    else if(wasAI) lastEndMode = 'ia';
+    else if(wasDaily) lastEndMode = 'diario';
+    else if(roomMode) lastEndMode = 'sala';
+    window.__lastEndMode = lastEndMode;
+
+    if(wasTrackStep){
+      endPrimaryBtn.style.display = 'none';
+      endWaitingNote.style.display = 'block';
+      endWaitingNote.textContent = correct >= trackStepTarget
+        ? 'Etapa concluída! Volte à sua trilha para seguir em frente. 🎉'
+        : `Volte à sua trilha pra tentar de novo (meta: ${trackStepTarget} acertos).`;
+      if(currentUser && correct >= trackStepTarget){
+        dbUpdateStepStatus(currentTrackStepId, 'concluida').catch(() => {});
+      }
+    } else if(wasAI){
+      endPrimaryBtn.style.display = 'block';
+      endPrimaryBtn.textContent = 'Gerar outro desafio';
+      endWaitingNote.style.display = 'none';
+    } else if(wasDaily){
       endPrimaryBtn.style.display = 'none';
       endWaitingNote.style.display = 'block';
       endWaitingNote.textContent = 'Volte amanhã para um novo desafio diário!';
@@ -1749,7 +1987,8 @@
     }
 
     if(currentUser){
-      recordGameResult(wasDaily ? 'diario' : (roomMode ? 'sala' : 'solo')).catch(() => {});
+      const mode = wasDaily ? 'diario' : (roomMode ? 'sala' : (wasTrackStep ? 'trilha' : (wasAI ? 'ia' : 'solo')));
+      recordGameResult(mode).catch(() => {});
     }
 
     showScreen('screen-end');
@@ -1819,6 +2058,11 @@
   const endExitBtn = document.getElementById('end-exit-btn');
 
   endPrimaryBtn.addEventListener('click', async () => {
+    if(window.__lastEndMode === 'ia'){
+      showScreen('screen-ai');
+      renderAIScreen();
+      return;
+    }
     if(!roomMode){
       startSoloGame();
       return;
@@ -2494,6 +2738,14 @@
 
   // ---- Teacher panel ----
   async function renderTeacherPanel(){
+    const noteEl = document.getElementById('teacher-school-note');
+    if(currentProfile && currentProfile.school_id){
+      const school = await dbGetSchoolById(currentProfile.school_id);
+      noteEl.textContent = school ? `Escola: ${school.name}` : '';
+    } else {
+      noteEl.textContent = 'Você ainda não faz parte de uma escola.';
+    }
+
     const list = document.getElementById('teacher-class-list');
     const classes = await dbGetClassesByTeacher(currentUser.id);
     if(classes.length === 0){
@@ -2655,8 +2907,12 @@
             <span>Melhor: ${s.bestScore}</span>
             <span>Última vez: ${lastDate}</span>
           </div>
+          <button class="link-btn" style="margin-top:8px" data-track-student="${id}" data-track-name="${escapeHtml(p ? p.username : '???')}">🧭 Ver trilha</button>
         </div>`;
     }).join('');
+    list.querySelectorAll('[data-track-student]').forEach(btn => {
+      btn.addEventListener('click', () => openStudentTrack(btn.dataset.trackStudent, btn.dataset.trackName));
+    });
   }
 
   document.getElementById('export-csv-btn').addEventListener('click', () => {
@@ -2735,6 +2991,290 @@
       alert(`Premium concedido a ${username} por ${days} dias.`);
     } catch(err){
       errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // =========================================================
+  // Schools (v2.0)
+  // =========================================================
+  document.getElementById('goto-school-btn').addEventListener('click', () => {
+    showScreen('screen-school');
+    renderSchoolScreen();
+  });
+
+  async function renderSchoolScreen(){
+    const noSchoolEl = document.getElementById('school-no-school');
+    const hasSchoolEl = document.getElementById('school-has-school');
+    if(!currentProfile || !currentProfile.school_id){
+      noSchoolEl.style.display = 'block';
+      hasSchoolEl.style.display = 'none';
+      return;
+    }
+    noSchoolEl.style.display = 'none';
+    hasSchoolEl.style.display = 'block';
+
+    const school = await dbGetSchoolById(currentProfile.school_id);
+    if(!school) return;
+    document.getElementById('school-name-display').textContent = school.name;
+
+    if(currentProfile.is_school_admin){
+      document.getElementById('school-code-display').textContent = `código para professores entrarem: ${school.school_code}`;
+      const teachersLabel = document.getElementById('school-teachers-label');
+      const classesLabel = document.getElementById('school-classes-label');
+      teachersLabel.style.display = 'block';
+      classesLabel.style.display = 'block';
+
+      const teachers = await dbGetSchoolTeachers(school.id);
+      document.getElementById('school-teachers-list').innerHTML = teachers.map(t =>
+        `<div class="class-row"><span>${t.icon} ${escapeHtml(t.username)}</span>${t.is_school_admin ? '<span class="cr-code">admin</span>' : ''}</div>`
+      ).join('') || '<div class="class-row">Nenhum outro professor ainda.</div>';
+
+      const classes = await dbGetSchoolClasses(school.id);
+      document.getElementById('school-classes-list').innerHTML = classes.map(c =>
+        `<div class="class-row"><span>${escapeHtml(c.name)}</span><span class="cr-code">${c.class_code}</span></div>`
+      ).join('') || '<div class="class-row">Nenhuma turma cadastrada ainda.</div>';
+    } else {
+      document.getElementById('school-code-display').textContent = 'você faz parte desta escola';
+      document.getElementById('school-teachers-label').style.display = 'none';
+      document.getElementById('school-classes-label').style.display = 'none';
+      document.getElementById('school-teachers-list').innerHTML = '';
+      document.getElementById('school-classes-list').innerHTML = '';
+    }
+  }
+
+  document.getElementById('create-school-btn').addEventListener('click', async () => {
+    const nameInput = document.getElementById('create-school-name-input');
+    const errEl = document.getElementById('create-school-error');
+    const btn = document.getElementById('create-school-btn');
+    const name = nameInput.value.trim();
+    if(!name){ errEl.textContent = 'Digite o nome da escola.'; return; }
+    btn.disabled = true;
+    errEl.textContent = '';
+    try{
+      const result = await dbCreateSchool(name);
+      if(result.error){ errEl.textContent = 'Erro: ' + result.error; return; }
+      await refreshProfile();
+      renderAccountBar();
+      await renderTeacherPanel();
+      showScreen('screen-school');
+      await renderSchoolScreen();
+    } catch(err){
+      errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('join-school-btn').addEventListener('click', async () => {
+    const codeInput = document.getElementById('join-school-code-input');
+    const errEl = document.getElementById('join-school-error');
+    const btn = document.getElementById('join-school-btn');
+    const code = codeInput.value.trim().toUpperCase();
+    if(!code){ errEl.textContent = 'Digite o código da escola.'; return; }
+    btn.disabled = true;
+    errEl.textContent = '';
+    try{
+      const err = await dbJoinSchoolByCode(code);
+      if(err){ errEl.textContent = 'Erro: ' + err; return; }
+      await refreshProfile();
+      renderAccountBar();
+      showScreen('screen-school');
+      await renderSchoolScreen();
+    } catch(err){
+      errEl.textContent = 'Erro de conexão: ' + (err && err.message ? err.message : 'tente novamente.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // =========================================================
+  // Learning tracks (v2.0)
+  // =========================================================
+  let viewingTrackForStudent = null;
+
+  function generateInitialTrackSteps(history){
+    let basicoCorrect = 0, basicoWrong = 0, avancadoCorrect = 0, avancadoWrong = 0;
+    history.forEach(h => {
+      if(h.level === 'basico'){ basicoCorrect += h.correct || 0; basicoWrong += h.wrong || 0; }
+      else { avancadoCorrect += h.correct || 0; avancadoWrong += h.wrong || 0; }
+    });
+    const basicoAcc = (basicoCorrect + basicoWrong) > 0 ? basicoCorrect / (basicoCorrect + basicoWrong) : 1;
+    const avancadoAcc = (avancadoCorrect + avancadoWrong) > 0 ? avancadoCorrect / (avancadoCorrect + avancadoWrong) : 1;
+    const weakLevel = avancadoAcc < basicoAcc ? 'avancado' : 'basico';
+    const strongLevel = weakLevel === 'basico' ? 'avancado' : 'basico';
+    const opsBasico = ['add','sub','mul','div'];
+    const opsAvancado = ['pow','root','pct','eq','order','logic'];
+    const weakOps = weakLevel === 'basico' ? opsBasico : opsAvancado;
+    const strongOps = strongLevel === 'basico' ? opsBasico : opsAvancado;
+    return [
+      { level: weakLevel, ops: weakOps, target: 10 },
+      { level: weakLevel, ops: weakOps, target: 15 },
+      { level: strongLevel, ops: strongOps, target: 10 },
+    ];
+  }
+
+  async function ensureTrack(studentId){
+    let track = await dbGetTrack(studentId);
+    if(!track){
+      track = await dbCreateTrack(studentId, 'system');
+      if(track){
+        const history = await dbGetHistory(studentId, 100);
+        const steps = generateInitialTrackSteps(history);
+        for(let i = 0; i < steps.length; i++){
+          await dbInsertTrackStep(track.id, i + 1, steps[i].level, steps[i].ops, steps[i].target);
+        }
+      }
+    }
+    return track;
+  }
+
+  function renderTrackSteps(steps, isSelf){
+    const list = document.getElementById('track-list');
+    let foundCurrent = false;
+    list.innerHTML = steps.map((s, i) => {
+      let cls = 'locked';
+      let rightHtml = '🔒';
+      if(s.status === 'concluida'){
+        cls = 'completed';
+        rightHtml = '✅';
+      } else if(!foundCurrent){
+        cls = 'current';
+        foundCurrent = true;
+        rightHtml = isSelf ? `<button class="link-btn" data-play-step="${s.id}">Jogar</button>` : '▶️';
+      }
+      const levelLabel = s.level === 'basico' ? 'Básico' : 'Avançado';
+      return `<div class="track-step-row ${cls}">
+        <div class="ts-label"><span>Etapa ${i+1} — ${levelLabel}</span><span class="ts-sub">${s.ops.join(', ')} · meta: ${s.target_correct} acertos</span></div>
+        ${rightHtml}
+      </div>`;
+    }).join('') || '<div class="track-step-row">Nenhuma etapa ainda.</div>';
+
+    if(isSelf){
+      list.querySelectorAll('[data-play-step]').forEach(btn => {
+        const step = steps.find(s => s.id === parseInt(btn.dataset.playStep, 10));
+        btn.addEventListener('click', () => startTrackStep(step));
+      });
+    }
+  }
+
+  async function renderTrackScreen(){
+    const subtitle = document.getElementById('track-subtitle');
+    const teacherLabel = document.getElementById('track-teacher-label');
+    const teacherControls = document.getElementById('track-teacher-controls');
+    document.getElementById('track-title').textContent = 'Minha trilha';
+    teacherLabel.style.display = 'none';
+    teacherControls.style.display = 'none';
+    viewingTrackForStudent = null;
+
+    if(!currentUser){
+      subtitle.style.display = 'block';
+      subtitle.textContent = 'Entre na sua conta para ver sua trilha personalizada.';
+      document.getElementById('track-list').innerHTML = '';
+      return;
+    }
+    subtitle.style.display = 'none';
+
+    const track = await ensureTrack(currentUser.id);
+    if(!track){
+      document.getElementById('track-list').innerHTML = '<div class="track-step-row">Não foi possível carregar sua trilha agora.</div>';
+      return;
+    }
+    const steps = await dbGetTrackSteps(track.id);
+    renderTrackSteps(steps, true);
+  }
+
+  async function openStudentTrack(studentId, studentName){
+    showScreen('screen-track');
+    document.getElementById('track-title').textContent = `Trilha de ${studentName}`;
+    document.getElementById('track-subtitle').style.display = 'none';
+    viewingTrackForStudent = studentId;
+
+    const track = await ensureTrack(studentId);
+    if(!track){
+      document.getElementById('track-list').innerHTML = '<div class="track-step-row">Não foi possível carregar a trilha.</div>';
+      return;
+    }
+    viewingTrackForStudent = track.id;
+    const steps = await dbGetTrackSteps(track.id);
+    renderTrackSteps(steps, false);
+
+    document.getElementById('track-teacher-label').style.display = 'block';
+    document.getElementById('track-teacher-controls').style.display = 'flex';
+  }
+
+  document.getElementById('track-add-easy-btn').addEventListener('click', async () => {
+    if(!viewingTrackForStudent) return;
+    const steps = await dbGetTrackSteps(viewingTrackForStudent);
+    await dbInsertTrackStep(viewingTrackForStudent, steps.length + 1, 'basico', ['add','sub','mul','div'], 12);
+    const updated = await dbGetTrackSteps(viewingTrackForStudent);
+    renderTrackSteps(updated, false);
+  });
+  document.getElementById('track-add-hard-btn').addEventListener('click', async () => {
+    if(!viewingTrackForStudent) return;
+    const steps = await dbGetTrackSteps(viewingTrackForStudent);
+    await dbInsertTrackStep(viewingTrackForStudent, steps.length + 1, 'avancado', ['pow','root','pct','eq','order','logic'], 12);
+    const updated = await dbGetTrackSteps(viewingTrackForStudent);
+    renderTrackSteps(updated, false);
+  });
+
+  document.getElementById('goto-track-btn').addEventListener('click', () => {
+    showScreen('screen-track');
+    renderTrackScreen();
+  });
+
+  // =========================================================
+  // AI-generated challenges (v2.0)
+  // =========================================================
+  const aiFocusButtons = [...document.querySelectorAll('#ai-focus-row .choice')];
+  aiFocusButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      aiFocusButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+  });
+
+  async function renderAIScreen(){
+    const subtitle = document.getElementById('ai-subtitle');
+    const form = document.getElementById('ai-form');
+    document.getElementById('ai-error').textContent = '';
+    if(!currentUser){
+      subtitle.style.display = 'block';
+      form.style.display = 'none';
+      return;
+    }
+    subtitle.style.display = 'none';
+    form.style.display = 'block';
+  }
+
+  document.getElementById('goto-ai-btn').addEventListener('click', () => {
+    showScreen('screen-ai');
+    renderAIScreen();
+  });
+
+  document.getElementById('ai-generate-btn').addEventListener('click', async () => {
+    const errEl = document.getElementById('ai-error');
+    const btn = document.getElementById('ai-generate-btn');
+    const theme = document.getElementById('ai-theme-input').value.trim();
+    const focusWeak = aiFocusButtons.find(b => b.classList.contains('selected')).dataset.focus === 'fraco';
+
+    btn.disabled = true;
+    errEl.textContent = 'Gerando desafio com IA…';
+    try{
+      const result = await dbGenerateAIChallenge(theme, focusWeak);
+      const questions = (result && result.questions) || [];
+      aiQuestions = questions
+        .filter(q => q && typeof q.text === 'string' && !isNaN(parseFloat(q.answer)))
+        .map(q => ({ text: q.text, answer: parseFloat(q.answer) }));
+      if(aiQuestions.length === 0){
+        errEl.textContent = 'Não foi possível gerar o desafio agora. Tente de novo em instantes.';
+        return;
+      }
+      errEl.textContent = '';
+      startAIGame();
+    } catch(err){
+      errEl.textContent = 'IA indisponível no momento. ' + (err && err.message ? err.message : '');
     } finally {
       btn.disabled = false;
     }
